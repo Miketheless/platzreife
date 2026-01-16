@@ -10,7 +10,7 @@
 // ══════════════════════════════════════════════════════════════
 
 // WICHTIG: Hier die URL des Google Apps Script Web App eintragen!
-const API_BASE = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzeT3syS3BN25_HR9QJ-qzHETYSTyz_Z61KxvIa8K0nr5b8XzIGr6A-FwyERn_DU3Dl_A/exec";
 
 // Statische Termine 2026 (Fallback falls API nicht erreichbar)
 const STATIC_DATES = [
@@ -191,7 +191,7 @@ function renderMonthFilter() {
 }
 
 /**
- * Slots-Übersicht rendern
+ * Slots-Übersicht als Tabelle rendern
  */
 function renderSlots() {
   // Nach Monat filtern
@@ -202,32 +202,39 @@ function renderSlots() {
   // Nur zukünftige Termine
   const futureSlots = filteredSlots.filter(s => isFuture(s.date));
   
-  if (futureSlots.length === 0) {
-    elements.slotsContainer.innerHTML = '<p class="no-slots">Keine Termine verfügbar.</p>';
+  // Tabellen-Body Element finden
+  const tbody = document.getElementById("slots-tbody");
+  if (!tbody) {
+    console.error("slots-tbody nicht gefunden");
     return;
   }
   
-  elements.slotsContainer.innerHTML = futureSlots.map(slot => {
+  if (futureSlots.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" class="no-slots">Keine Termine verfügbar.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = futureSlots.map(slot => {
     const free = slot.capacity - slot.booked;
     let availClass = "available";
-    let availText = `${free} Plätze frei`;
+    let availText = `${free} Plätze`;
     
     if (free === 0) {
       availClass = "full";
       availText = "Ausgebucht";
     } else if (free <= 2) {
       availClass = "few";
-      availText = `Nur ${free} ${free === 1 ? "Platz" : "Plätze"} frei`;
+      availText = `${free} ${free === 1 ? "Platz" : "Plätze"}`;
     }
     
     return `
-      <div class="slot">
-        <div>
-          <div class="slot-date">${formatDate(slot.date)}</div>
-          <div class="slot-time">${slot.start}–${slot.end} Uhr</div>
-        </div>
-        <span class="slot-availability ${availClass}">${availText}</span>
-      </div>
+      <tr>
+        <td class="slot-date-cell">${formatDate(slot.date)}</td>
+        <td class="slot-time-cell">${slot.start}–${slot.end} Uhr</td>
+        <td class="slot-free-cell">
+          <span class="slot-free-badge ${availClass}">${availText}</span>
+        </td>
+      </tr>
     `;
   }).join("");
 }
@@ -254,7 +261,7 @@ function renderSlotSelect() {
 }
 
 /**
- * Teilnehmerfelder rendern
+ * Teilnehmerfelder rendern (inkl. Kontaktdaten)
  */
 function renderParticipants(count) {
   elements.participantsContainer.innerHTML = "";
@@ -262,8 +269,21 @@ function renderParticipants(count) {
   for (let i = 0; i < count; i++) {
     const box = document.createElement("div");
     box.className = "participant-box";
+    
+    // Für den ersten Teilnehmer zusätzlich E-Mail und Handynummer abfragen
+    const contactFields = i === 0 ? `
+        <label>
+          E-Mail-Adresse
+          <input type="email" name="email_${i}" id="participant-email-0" placeholder="ihre@email.at" required>
+        </label>
+        <label>
+          Handynummer
+          <input type="tel" name="phone_${i}" id="participant-phone-0" placeholder="+43 664 1234567" required>
+        </label>
+    ` : '';
+    
     box.innerHTML = `
-      <h4>Teilnehmer ${i + 1}</h4>
+      <h4>Teilnehmer ${i + 1}${i === 0 ? ' (Ansprechpartner)' : ''}</h4>
       <div class="form-grid">
         <label>
           Vorname
@@ -273,6 +293,7 @@ function renderParticipants(count) {
           Nachname
           <input type="text" name="last_name_${i}" required>
         </label>
+        ${contactFields}
         <label>
           Straße
           <input type="text" name="street_${i}" required>
@@ -370,21 +391,26 @@ elements.bookingForm.addEventListener("submit", async (e) => {
     return;
   }
   
-  const email = elements.contactEmail.value.trim();
-  if (!email) {
-    showMessage("Bitte geben Sie Ihre E-Mail-Adresse ein.", "error");
-    return;
-  }
-  
-  const phone = elements.contactPhone.value.trim();
-  if (!phone) {
-    showMessage("Bitte geben Sie Ihre Handynummer ein.", "error");
-    return;
-  }
-  
   const count = parseInt(elements.participantCount.value);
   if (count < 1 || count > MAX_CAPACITY) {
     showMessage("Ungültige Teilnehmeranzahl.", "error");
+    return;
+  }
+  
+  // E-Mail und Handynummer vom ersten Teilnehmer holen
+  const emailInput = document.getElementById("participant-email-0");
+  const phoneInput = document.getElementById("participant-phone-0");
+  
+  const email = emailInput ? emailInput.value.trim() : "";
+  const phone = phoneInput ? phoneInput.value.trim() : "";
+  
+  if (!email) {
+    showMessage("Bitte geben Sie die E-Mail-Adresse des Ansprechpartners ein.", "error");
+    return;
+  }
+  
+  if (!phone) {
+    showMessage("Bitte geben Sie die Handynummer des Ansprechpartners ein.", "error");
     return;
   }
   

@@ -191,6 +191,79 @@ a:hover {
   text-align: center;
 }
 
+/* Grüner Header */
+.hero-green {
+  background: linear-gradient(135deg, #4a8c7b 0%, #3d7569 50%, #2d5a4d 100%);
+  color: white;
+  padding: 3rem 2rem 4rem;
+}
+
+.hero-green h1 {
+  color: white;
+}
+
+.hero-green .hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-green .hero-description {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1rem;
+  line-height: 1.8;
+  max-width: 650px;
+  margin: 0 auto 2rem;
+  text-align: left;
+}
+
+/* Eye-Catcher Badge */
+.hero-eyecatcher {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  color: var(--color-primary);
+  padding: 1.5rem 2.5rem;
+  margin: 1.5rem auto 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.hero-eyecatcher::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+.eyecatcher-year {
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.eyecatcher-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin: 0.5rem 0;
+  color: var(--color-text);
+}
+
+.eyecatcher-sub {
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-text-light);
+}
+
 .hero-inner {
   max-width: var(--container-narrow);
   margin: 0 auto;
@@ -366,6 +439,80 @@ a:hover {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   SLOTS TABELLE
+   ══════════════════════════════════════════════════════════════════════════════ */
+.slots-table-container {
+  overflow-x: auto;
+}
+
+.slots-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.slots-table th {
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.slots-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+  vertical-align: middle;
+}
+
+.slots-table tbody tr {
+  transition: var(--transition);
+}
+
+.slots-table tbody tr:hover {
+  background: var(--color-bg-light);
+}
+
+.slots-table .slot-date-cell {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.slots-table .slot-time-cell {
+  color: var(--color-text-light);
+}
+
+.slots-table .slot-free-cell {
+  text-align: center;
+}
+
+.slot-free-badge {
+  display: inline-block;
+  padding: 0.375rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 2px;
+}
+
+.slot-free-badge.available {
+  background: var(--color-primary-faded);
+  color: var(--color-primary);
+}
+
+.slot-free-badge.few {
+  background: rgba(212, 168, 75, 0.15);
+  color: #8b7030;
+}
+
+.slot-free-badge.full {
+  background: rgba(196, 92, 92, 0.1);
+  color: var(--color-error);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    FORMS – Elegant & Clean (Metzenhof Style)
    ══════════════════════════════════════════════════════════════════════════════ */
 label {
@@ -528,6 +675,47 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 0;
   accent-color: var(--color-primary);
   cursor: pointer;
+}
+
+/* Viereckige Checkboxen mit Rahmen */
+.checkbox-square {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 1.5rem !important;
+  border: 2px solid var(--color-border);
+  border-radius: 0 !important;
+  background: white;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.checkbox-square:hover {
+  border-color: var(--color-primary);
+}
+
+.checkbox-square:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox-square:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.checkbox-square:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .checkbox-item span {

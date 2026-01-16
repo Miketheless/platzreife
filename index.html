@@ -10,9 +10,9 @@
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════
-     HEADER
+     HEADER (Grün mit Eye-Catcher)
      ═══════════════════════════════════════════════════════════ -->
-<header class="hero">
+<header class="hero hero-green">
   <div class="hero-inner">
     <div class="hero-logos">
       <a href="https://www.metzenhof.at" target="_blank" rel="noopener">
@@ -21,17 +21,19 @@
       <img src="Gemma Golfn Logo Quer 1C_WEISS.svg" alt="Gemma Golfn" class="hero-logo hero-logo-gemma">
     </div>
     
-    <!-- Golf Icon (wie auf metzenhof.at) -->
-    <div class="hero-icon">
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="32" cy="14" r="6"/>
-        <path d="M24 24 L24 56 M24 56 L18 56 M24 56 L30 56"/>
-        <path d="M28 28 L42 20 L44 24 L30 34"/>
-      </svg>
+    <!-- Eye-Catcher Badge -->
+    <div class="hero-eyecatcher">
+      <span class="eyecatcher-year">2026</span>
+      <span class="eyecatcher-title">Platzreifekurse</span>
+      <span class="eyecatcher-sub">inkl. Jahresmitgliedschaft</span>
     </div>
     
-    <p class="hero-motto tagline">mitanaund genießen</p>
     <h1>Platzreife buchen</h1>
+    
+    <p class="hero-description">
+      Der Platzerlaubnis-Kurs: Dein Einstieg in die Welt des Golfsports! In diesem Kurs lernst du die Grundschläge, die wichtigsten Golfregeln und das richtige Verhalten auf dem Platz. Auch das Spielen auf dem Platz ist ein zentraler Bestandteil des Kurses. Nach erfolgreichem Abschluss bist du berechtigt, unsere wunderschöne 18-Loch-Anlage zu nutzen und kannst an unseren Workshops teilnehmen, um deine persönliche Turnierlizenz zu erwerben. Mach den ersten Schritt – und entdecke deine Leidenschaft für Golf!
+    </p>
+    
     <p class="hero-subtitle">09:00–15:00 Uhr · max. 8 Teilnehmer pro Termin</p>
   </div>
 </header>
@@ -41,10 +43,10 @@
      ═══════════════════════════════════════════════════════════ -->
 <main class="container">
   
-  <!-- TERMINE ÜBERSICHT -->
+  <!-- TERMINE ÜBERSICHT ALS TABELLE -->
   <section class="card">
     <div class="card-header">
-      <h2>Freie Termine</h2>
+      <h2>Freie Termine 2026</h2>
     </div>
     
     <div class="filter-row">
@@ -54,8 +56,19 @@
       </select>
     </div>
     
-    <div id="slots-container" class="slots-grid">
-      <p class="no-slots">Termine werden geladen...</p>
+    <div id="slots-container" class="slots-table-container">
+      <table class="slots-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Freie Plätze</th>
+          </tr>
+        </thead>
+        <tbody id="slots-tbody">
+          <tr><td colspan="3" class="no-slots">Termine werden geladen...</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
   
@@ -74,37 +87,28 @@
         </select>
       </label>
       
-      <!-- Kontaktdaten -->
-      <h3>Kontaktdaten</h3>
-      <div class="form-grid">
-        <label for="contact-email">
-          E-Mail-Adresse
-          <input type="email" id="contact-email" placeholder="ihre@email.at" required>
-        </label>
-        <label for="contact-phone">
-          Handynummer
-          <input type="tel" id="contact-phone" placeholder="+43 664 1234567" required>
-        </label>
-      </div>
-      
       <!-- Teilnehmeranzahl -->
       <label for="participant-count">
         Anzahl Teilnehmer (1–8)
         <input type="number" id="participant-count" min="1" max="8" value="1" required>
       </label>
       
-      <!-- Teilnehmerdaten -->
+      <!-- Teilnehmerdaten (inkl. Kontaktdaten) -->
       <h3>Teilnehmerdaten</h3>
       <div id="participants-container"></div>
+      
+      <!-- Versteckte Kontaktfelder (werden aus erstem Teilnehmer befüllt) -->
+      <input type="hidden" id="contact-email">
+      <input type="hidden" id="contact-phone">
       
       <!-- Checkboxen -->
       <div class="checkbox-group">
         <label class="checkbox-item">
-          <input type="checkbox" id="agb-checkbox" required>
+          <input type="checkbox" id="agb-checkbox" class="checkbox-square" required>
           <span>Ich akzeptiere die <a href="agb.html" target="_blank">AGB</a>.</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" id="privacy-checkbox" required>
+          <input type="checkbox" id="privacy-checkbox" class="checkbox-square" required>
           <span>Ich habe die <a href="privacy.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</span>
         </label>
       </div>
@@ -185,7 +189,7 @@
   </div>
   
   <div class="footer-bottom">
-    <p>© 2026 Golfclub Metzenhof – „mitanaund genießen"</p>
+    <p>© 2026 Golfclub Metzenhof</p>
     <a href="https://www.metzenhof.at/impressum/" target="_blank">Impressum</a>
     <a href="privacy.html">Datenschutz</a>
   </div>
@@ -194,4 +198,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-
