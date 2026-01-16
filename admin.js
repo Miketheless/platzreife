@@ -10,7 +10,7 @@
 // ══════════════════════════════════════════════════════════════
 
 // WICHTIG: Hier die URL des Google Apps Script Web App eintragen!
-const API_BASE = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzeT3syS3BN25_HR9QJ-qzHETYSTyz_Z61KxvIa8K0nr5b8XzIGr6A-FwyERn_DU3Dl_A/exec";
 
 // ══════════════════════════════════════════════════════════════
 // DOM ELEMENTE

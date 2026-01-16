@@ -204,6 +204,8 @@ function renderMonthFilter() {
   });
 }
 
+
+
 /**
  * Slots-Übersicht als kompaktes 3-Spalten Grid rendern
  */
