@@ -62,12 +62,24 @@ body {
   border-radius: 32px 32px 0 0;
 }
 
+.hero-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
 .hero-logo {
-  width: 160px;
-  height: auto;
-  margin-bottom: 20px;
+  height: 56px;
+  width: auto;
   filter: brightness(0) invert(1);
   opacity: 0.95;
+}
+
+.hero-logo-gemma {
+  height: 48px;
 }
 
 .hero h1 {
