@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<main class="container">
+  <h1>Admin – Buchungen</h1>
+
+  <section class="card">
+    <label>Admin Key
+      <input id="admin_key" type="password" placeholder="Key eingeben"/>
+    </label>
+    <button id="load">Laden</button>
+    <button id="export">CSV Export</button>
+    <p id="msg"></p>
+  </section>
+
+  <section id="list" class="card"></section>
+</main>
+
+<script src="admin.js"></script>
+</body>
+</html>
