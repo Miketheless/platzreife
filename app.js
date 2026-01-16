@@ -134,6 +134,22 @@ function clearMessage() {
 // ══════════════════════════════════════════════════════════════
 
 /**
+ * Statische Slots generieren (Fallback)
+ */
+function generateStaticSlots() {
+  return STATIC_DATES.filter(isFuture).map(date => ({
+    slot_id: date,
+    date: date,
+    start: COURSE_START,
+    end: COURSE_END,
+    capacity: MAX_CAPACITY,
+    booked: 0,
+    free: MAX_CAPACITY,
+    status: "OPEN"
+  }));
+}
+
+/**
  * Slots vom Backend laden
  */
 async function fetchSlots() {
@@ -141,20 +157,18 @@ async function fetchSlots() {
     const response = await fetch(`${API_BASE}?action=slots`);
     if (!response.ok) throw new Error("API nicht erreichbar");
     const data = await response.json();
-    return data.slots || [];
+    const slots = data.slots || [];
+    
+    // Falls API keine Slots liefert, Fallback verwenden
+    if (slots.length === 0) {
+      console.warn("API liefert keine Slots, verwende statische Termine");
+      return generateStaticSlots();
+    }
+    
+    return slots;
   } catch (error) {
     console.warn("API nicht erreichbar, verwende statische Termine:", error);
-    // Fallback: Statische Termine mit voller Kapazität
-    return STATIC_DATES.filter(isFuture).map(date => ({
-      slot_id: date,
-      date: date,
-      start: COURSE_START,
-      end: COURSE_END,
-      capacity: MAX_CAPACITY,
-      booked: 0,
-      free: MAX_CAPACITY,
-      status: "OPEN"
-    }));
+    return generateStaticSlots();
   }
 }
 
