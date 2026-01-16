@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * PLATZREIFE – Frontend JavaScript
- * Golfclub Metzenhof
+ * Golfclub Metzenhof – Version 2.0 (16.01.2026)
  * ═══════════════════════════════════════════════════════════
  */
 
