@@ -1,38 +1,82 @@
 const SCRIPT_BASE = "PASTE_YOUR_SCRIPT_URL_HERE"; // .../exec
 
-const slotsEl = document.getElementById("slots");
 const slotSel = document.getElementById("slot_id");
-const monthEl = document.getElementById("month");
 const msgEl = document.getElementById("msg");
 const participantsEl = document.getElementById("participants");
 const countEl = document.getElementById("count");
 
-let allSlots = [];
+// Statische Termine 2026
+const TERMINE = [
+  "25.02.2026",
+  "07.03.2026",
+  "14.03.2026",
+  "21.03.2026",
+  "28.03.2026",
+  "04.04.2026",
+  "18.04.2026",
+  "25.04.2026",
+  "01.05.2026",
+  "02.05.2026",
+  "16.05.2026",
+  "30.05.2026",
+  "13.06.2026",
+  "20.06.2026",
+  "27.06.2026",
+  "04.07.2026",
+  "18.07.2026",
+  "01.08.2026",
+  "08.08.2026",
+  "15.08.2026",
+  "22.08.2026",
+  "29.08.2026",
+  "05.09.2026",
+  "19.09.2026",
+  "03.10.2026",
+  "17.10.2026"
+];
 
-function fmtSlot(s) {
-  return `${s.date} ${s.start}–${s.end} • frei: ${s.free}/${s.capacity}`;
+// Wochentag-Namen
+const WOCHENTAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
+function parseDate(dateStr) {
+  // "25.02.2026" -> Date
+  const [day, month, year] = dateStr.split(".");
+  return new Date(year, month - 1, day);
 }
 
-function renderSlots() {
-  const m = monthEl.value; // "2026-02"
-  const filtered = m ? allSlots.filter(s => s.date.startsWith(m)) : allSlots;
+function formatSlotId(dateStr) {
+  // "25.02.2026" -> "2026-02-25"
+  const [day, month, year] = dateStr.split(".");
+  return `${year}-${month}-${day}`;
+}
 
-  slotsEl.innerHTML = "";
+function renderTermine() {
   slotSel.innerHTML = "";
-
-  filtered.forEach(s => {
-    const div = document.createElement("div");
-    div.className = "slot";
-    div.textContent = fmtSlot(s);
-    slotsEl.appendChild(div);
-
-    if (s.free > 0) {
+  
+  const heute = new Date();
+  heute.setHours(0, 0, 0, 0);
+  
+  TERMINE.forEach(termin => {
+    const date = parseDate(termin);
+    
+    // Nur zukünftige Termine anzeigen
+    if (date >= heute) {
+      const wochentag = WOCHENTAGE[date.getDay()];
       const opt = document.createElement("option");
-      opt.value = s.slot_id;
-      opt.textContent = fmtSlot(s);
+      opt.value = formatSlotId(termin);
+      opt.textContent = `${wochentag}, ${termin} • 09:00–15:00 Uhr`;
       slotSel.appendChild(opt);
     }
   });
+  
+  // Falls keine Termine verfügbar
+  if (slotSel.options.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "Aktuell keine Termine verfügbar";
+    opt.disabled = true;
+    slotSel.appendChild(opt);
+  }
 }
 
 function renderParticipants(n) {
@@ -54,15 +98,6 @@ function renderParticipants(n) {
     participantsEl.appendChild(wrap);
   }
 }
-
-async function loadSlots() {
-  const res = await fetch(`${SCRIPT_BASE}?action=slots`);
-  const data = await res.json();
-  allSlots = data.slots || [];
-  renderSlots();
-}
-
-monthEl.addEventListener("change", renderSlots);
 
 countEl.addEventListener("input", () => {
   const n = Math.max(1, Math.min(8, Number(countEl.value || 1)));
@@ -107,9 +142,8 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   msgEl.textContent = data.ok
     ? `✅ Gebucht! Buchungs-ID: ${data.booking_id}`
     : `❌ ${data.message || "Fehler"}`;
-
-  if (data.ok) await loadSlots();
 });
 
+// Initialisierung
 renderParticipants(1);
-loadSlots();
+renderTermine();
