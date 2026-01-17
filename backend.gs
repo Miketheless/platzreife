@@ -113,6 +113,11 @@ function formatDateForEmail(dateStr) {
  * Unterstützt auch Buchungen via GET (für CORS-Kompatibilität)
  */
 function doGet(e) {
+  // Sicherheitsprüfung für fehlende Parameter
+  if (!e || !e.parameter) {
+    return jsonResponse({ ok: false, message: "Keine Parameter übergeben" });
+  }
+  
   const action = e.parameter.action;
   
   switch (action) {

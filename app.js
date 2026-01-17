@@ -14,7 +14,7 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbxXWaMxO_IWKLuWxbVKAmm4ZQLpoBbjFUCYijILhE4Ka7wkOQ1yF3V9VYyatczUgI5pQw/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbw2p10V1q7BD9BxLEawGyQr2dWrdK1aVsl406PvqB5JL3MU3tHWYEWgAWZekbi_XNAEiw/exec",
   MAX_PARTICIPANTS: 8,
   COURSE_START: "09:00",
   COURSE_END: "15:00",

@@ -10,7 +10,7 @@
 // KONFIGURATION
 // ══════════════════════════════════════════════════════════════
 
-const API_BASE = "https://script.google.com/macros/s/AKfycbz0U7y9zjo3MMwJ78xBSGIcePIMPheP6u6DIUBxmUCEZgy-OUyRRee76s8LupmS2xaAOg/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzqu4baOn_qlzcQkeNK6NumYOEhRwTfGP-QbLKDtb8fi49MMq-TStg5-ZYevPUgYOq3/exec";
 
 // ══════════════════════════════════════════════════════════════
 // DOM ELEMENTE
