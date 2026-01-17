@@ -1,294 +1,211 @@
 /**
- * ═══════════════════════════════════════════════════════════
- * PLATZREIFE – Frontend JavaScript
- * Golfclub Metzenhof – Version 2.3 (17.01.2026) – Neue Termin-Karten
- * ═══════════════════════════════════════════════════════════
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * PLATZREIFE BUCHUNGSSYSTEM – NEU PROGRAMMIERT
+ * Golfclub Metzenhof – Version 3.0 (17.01.2026)
+ * ═══════════════════════════════════════════════════════════════════════════════
  */
 
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 // KONFIGURATION
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
-// WICHTIG: Hier die URL des Google Apps Script Web App eintragen!
-const API_BASE = "https://script.google.com/macros/s/AKfycbzeT3syS3BN25_HR9QJ-qzHETYSTyz_Z61KxvIa8K0nr5b8XzIGr6A-FwyERn_DU3Dl_A/exec";
-
-// Statische Termine 2026 (Fallback falls API nicht erreichbar)
-const STATIC_DATES = [
-  "2026-02-25", "2026-03-07", "2026-03-14", "2026-03-21", "2026-03-28",
-  "2026-04-04", "2026-04-18", "2026-04-25", "2026-05-01", "2026-05-02",
-  "2026-05-16", "2026-05-30", "2026-06-13", "2026-06-20", "2026-06-27",
-  "2026-07-04", "2026-07-18", "2026-08-01", "2026-08-08", "2026-08-15",
-  "2026-08-22", "2026-08-29", "2026-09-05", "2026-09-19", "2026-10-03",
-  "2026-10-17"
-];
-
-// Kurszeiten
-const COURSE_START = "09:00";
-const COURSE_END = "15:00";
-const MAX_CAPACITY = 8;
-
-// ══════════════════════════════════════════════════════════════
-// DOM ELEMENTE
-// ══════════════════════════════════════════════════════════════
-
-const elements = {
-  monthFilter: document.getElementById("month-filter"),
-  slotsContainer: document.getElementById("slots-container"),
-  slotSelect: document.getElementById("slot-select"),
-  bookingForm: document.getElementById("booking-form"),
-  contactEmail: document.getElementById("contact-email"),
-  contactPhone: document.getElementById("contact-phone"),
-  participantCount: document.getElementById("participant-count"),
-  participantsContainer: document.getElementById("participants-container"),
-  agbCheckbox: document.getElementById("agb-checkbox"),
-  privacyCheckbox: document.getElementById("privacy-checkbox"),
-  submitBtn: document.getElementById("submit-btn"),
-  formMessage: document.getElementById("form-message"),
-  successSection: document.getElementById("success-section"),
-  successBookingId: document.getElementById("success-booking-id"),
-  successDate: document.getElementById("success-date"),
-  successCount: document.getElementById("success-count"),
-  successEmail: document.getElementById("success-email")
+const CONFIG = {
+  // Backend API URL
+  API_URL: "https://script.google.com/macros/s/AKfycbzeT3syS3BN25_HR9QJ-qzHETYSTyz_Z61KxvIa8K0nr5b8XzIGr6A-FwyERn_DU3Dl_A/exec",
+  
+  // Kurs-Einstellungen
+  MAX_PARTICIPANTS: 8,
+  COURSE_START: "09:00",
+  COURSE_END: "15:00",
+  
+  // Feste Termine 2026
+  DATES_2026: [
+    "2026-02-25", "2026-02-28", "2026-03-04", "2026-03-07", "2026-03-11",
+    "2026-03-14", "2026-03-18", "2026-03-21", "2026-03-25", "2026-03-28",
+    "2026-04-01", "2026-04-04", "2026-04-08", "2026-04-11", "2026-04-15",
+    "2026-04-18", "2026-04-22", "2026-04-25", "2026-04-29", "2026-05-02",
+    "2026-05-06", "2026-05-09", "2026-05-13", "2026-09-16", "2026-10-14",
+    "2026-10-17"
+  ]
 };
 
-// ══════════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════════
-
-let allSlots = [];
-let selectedMonth = "";
-
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 // HILFSFUNKTIONEN
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Wochentag-Namen
- */
 const WEEKDAYS = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-const MONTHS = ["Jänner", "Februar", "März", "April", "Mai", "Juni", 
-                "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+const MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const MONTHS_SHORT = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
 /**
- * Datum parsen: Unterstützt YYYY-MM-DD und DD.MM.YYYY
+ * Datum parsen (YYYY-MM-DD oder DD.MM.YYYY)
  */
-function parseDate(dateStr) {
-  if (!dateStr) return null;
-  let year, month, day;
+function parseDate(str) {
+  if (!str) return null;
   
-  if (dateStr.includes("-")) {
-    [year, month, day] = dateStr.split("-").map(Number);
-  } else if (dateStr.includes(".")) {
-    [day, month, year] = dateStr.split(".").map(Number);
+  let y, m, d;
+  if (str.includes("-")) {
+    [y, m, d] = str.split("-").map(Number);
+  } else if (str.includes(".")) {
+    [d, m, y] = str.split(".").map(Number);
   } else {
     return null;
   }
   
-  return { year, month, day };
+  return { year: y, month: m, day: d };
 }
 
 /**
- * Datum formatieren: "2026-02-25" → "Mittwoch, 25.02.2026"
+ * Datum formatieren: "Mittwoch, 25.02.2026"
  */
-function formatDate(dateStr) {
-  const parsed = parseDate(dateStr);
-  if (!parsed) return dateStr;
+function formatDate(str) {
+  const p = parseDate(str);
+  if (!p) return str;
   
-  const { year, month, day } = parsed;
-  const date = new Date(year, month - 1, day);
-  const weekday = WEEKDAYS[date.getDay()];
-  return `${weekday}, ${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}`;
+  const date = new Date(p.year, p.month - 1, p.day);
+  const wd = WEEKDAYS[date.getDay()];
+  return `${wd}, ${String(p.day).padStart(2, "0")}.${String(p.month).padStart(2, "0")}.${p.year}`;
 }
 
 /**
- * Kurzes Datum: "2026-02-25" → "25.02.2026"
+ * Prüfen ob Datum heute oder in der Zukunft liegt
  */
-function formatDateShort(dateStr) {
-  const parsed = parseDate(dateStr);
-  if (!parsed) return dateStr;
-  
-  const { year, month, day } = parsed;
-  return `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}`;
-}
-
-/**
- * Monat extrahieren: "2026-02-25" → "2026-02"
- */
-function getMonth(dateStr) {
-  const parsed = parseDate(dateStr);
-  if (!parsed) return "";
-  return `${parsed.year}-${String(parsed.month).padStart(2, "0")}`;
-}
-
-/**
- * Monat formatieren: "2026-02" → "Februar 2026"
- */
-function formatMonth(monthStr) {
-  if (!monthStr || !monthStr.includes("-")) return monthStr;
-  const [year, month] = monthStr.split("-");
-  return `${MONTHS[parseInt(month) - 1]} ${year}`;
-}
-
-/**
- * Prüfen ob Datum in der Zukunft liegt
- * Unterstützt YYYY-MM-DD und DD.MM.YYYY
- */
-function isFuture(dateStr) {
-  const parsed = parseDate(dateStr);
-  if (!parsed) return false;
+function isFuture(str) {
+  const p = parseDate(str);
+  if (!p) return false;
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  const { year, month, day } = parsed;
-  const date = new Date(year, month - 1, day);
+  const date = new Date(p.year, p.month - 1, p.day);
   return date >= today;
 }
 
 /**
  * Nachricht anzeigen
  */
-function showMessage(text, type = "") {
-  elements.formMessage.textContent = text;
-  elements.formMessage.className = `message ${type}`;
+function showMessage(text, type = "info") {
+  const msgEl = document.getElementById("message");
+  if (!msgEl) return;
+  
+  msgEl.textContent = text;
+  msgEl.className = `message ${type}`;
+  msgEl.style.display = "block";
+  
+  if (type !== "error") {
+    setTimeout(() => { msgEl.style.display = "none"; }, 5000);
+  }
 }
 
 /**
- * Nachricht leeren
+ * Zufällige Buchungs-ID generieren
  */
-function clearMessage() {
-  elements.formMessage.textContent = "";
-  elements.formMessage.className = "message";
+function generateBookingId() {
+  return "PLR-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-// ══════════════════════════════════════════════════════════════
-// API FUNKTIONEN
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// SLOTS / TERMINE
+// ══════════════════════════════════════════════════════════════════════════════
+
+let allSlots = [];
 
 /**
  * Statische Slots generieren (Fallback)
  */
 function generateStaticSlots() {
-  return STATIC_DATES.filter(isFuture).map(date => ({
-    slot_id: date,
-    date: date,
-    start: COURSE_START,
-    end: COURSE_END,
-    capacity: MAX_CAPACITY,
-    booked: 0,
-    free: MAX_CAPACITY,
-    status: "OPEN"
-  }));
+  return CONFIG.DATES_2026
+    .filter(isFuture)
+    .map(date => ({
+      slot_id: date,
+      date: date,
+      start: CONFIG.COURSE_START,
+      end: CONFIG.COURSE_END,
+      capacity: CONFIG.MAX_PARTICIPANTS,
+      booked: 0
+    }));
 }
 
 /**
- * Slots vom Backend laden
+ * Slots von API laden
  */
 async function fetchSlots() {
   try {
-    const response = await fetch(`${API_BASE}?action=slots`);
-    if (!response.ok) throw new Error("API nicht erreichbar");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`${CONFIG.API_URL}?action=slots`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    
+    if (!response.ok) throw new Error("API Error");
+    
     const data = await response.json();
     const slots = data.slots || [];
     
-    // Falls API keine Slots liefert, Fallback verwenden
     if (slots.length === 0) {
-      console.warn("API liefert keine Slots, verwende statische Termine");
+      console.log("API leer, verwende statische Termine");
       return generateStaticSlots();
     }
     
     return slots;
-  } catch (error) {
-    console.warn("API nicht erreichbar, verwende statische Termine:", error);
+  } catch (e) {
+    console.log("API nicht erreichbar, verwende statische Termine:", e.message);
     return generateStaticSlots();
   }
 }
 
-/**
- * Buchung an Backend senden
- */
-async function submitBooking(payload) {
-  const response = await fetch(`${API_BASE}?action=book`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  return await response.json();
-}
-
-// ══════════════════════════════════════════════════════════════
-// RENDER FUNKTIONEN
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDERING
+// ══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Monatsfilter aufbauen
+ * Termine-Grid rendern
  */
-function renderMonthFilter() {
-  // Alle einzigartigen Monate sammeln
-  const months = [...new Set(allSlots.map(s => getMonth(s.date)))].sort();
-  
-  elements.monthFilter.innerHTML = '<option value="">Alle Termine anzeigen</option>';
-  months.forEach(month => {
-    const option = document.createElement("option");
-    option.value = month;
-    option.textContent = formatMonth(month);
-    elements.monthFilter.appendChild(option);
-  });
-}
-
-
-
-/**
- * Slots-Übersicht – Neu gebaut mit Karten-Design
- */
-function renderSlots() {
+function renderTermine() {
   const container = document.getElementById("slots-container");
   if (!container) {
     console.error("slots-container nicht gefunden");
     return;
   }
   
-  // Robuste Slot-Extraktion
-  const futureSlots = allSlots
-    .map(slot => {
-      const dateStr = slot.date || slot.slot_id || "";
-      const capacity = parseInt(slot.capacity) || MAX_CAPACITY;
-      const booked = parseInt(slot.booked) || 0;
-      return { ...slot, date: dateStr, capacity, booked };
+  // Slots normalisieren und filtern
+  const slots = allSlots
+    .map(s => {
+      const dateStr = s.date || s.slot_id || "";
+      return {
+        date: dateStr,
+        capacity: parseInt(s.capacity) || CONFIG.MAX_PARTICIPANTS,
+        booked: parseInt(s.booked) || 0,
+        start: s.start || CONFIG.COURSE_START,
+        end: s.end || CONFIG.COURSE_END
+      };
     })
     .filter(s => s.date && isFuture(s.date))
     .sort((a, b) => {
-      // Sortierung nach normalisiertem Datum
       const pa = parseDate(a.date);
       const pb = parseDate(b.date);
       if (!pa || !pb) return 0;
-      const da = new Date(pa.year, pa.month - 1, pa.day);
-      const db = new Date(pb.year, pb.month - 1, pb.day);
-      return da - db;
+      return new Date(pa.year, pa.month - 1, pa.day) - new Date(pb.year, pb.month - 1, pb.day);
     });
   
-  console.log(`${futureSlots.length} zukünftige Termine für Anzeige`);
+  console.log(`${slots.length} zukünftige Termine`);
   
-  if (futureSlots.length === 0) {
+  if (slots.length === 0) {
     container.innerHTML = '<div class="termine-empty">Aktuell keine Termine verfügbar.</div>';
     return;
   }
   
-  // Wochentage (kurz)
-  const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-  const MONTHS_SHORT = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-  
-  // Termin-Karten erstellen
-  container.innerHTML = futureSlots.map(slot => {
-    const parsed = parseDate(slot.date);
-    if (!parsed) return "";
+  // HTML generieren
+  container.innerHTML = slots.map(slot => {
+    const p = parseDate(slot.date);
+    if (!p) return "";
     
     const free = slot.capacity - slot.booked;
-    const dateObj = new Date(parsed.year, parsed.month - 1, parsed.day);
-    const weekday = WEEKDAYS_SHORT[dateObj.getDay()];
-    const monthName = MONTHS_SHORT[parsed.month - 1];
+    const dateObj = new Date(p.year, p.month - 1, p.day);
     
-    // Status bestimmen
     let statusClass = "";
     let statusIcon = "✓";
     let statusText = `${free} Plätze frei`;
@@ -305,9 +222,9 @@ function renderSlots() {
     
     return `
       <div class="termin-card ${statusClass}">
-        <div class="termin-weekday">${weekday}</div>
-        <div class="termin-day">${parsed.day}</div>
-        <div class="termin-month">${monthName} ${parsed.year}</div>
+        <div class="termin-weekday">${WEEKDAYS_SHORT[dateObj.getDay()]}</div>
+        <div class="termin-day">${p.day}</div>
+        <div class="termin-month">${MONTHS_SHORT[p.month - 1]} ${p.year}</div>
         <div class="termin-status">
           <span class="termin-status-icon">${statusIcon}</span>
           ${statusText}
@@ -318,306 +235,291 @@ function renderSlots() {
 }
 
 /**
- * Slot-Dropdown für Buchung rendern
+ * Dropdown für Terminauswahl rendern
  */
-function renderSlotSelect() {
-  // Nur buchbare Slots (Zukunft + freie Plätze)
-  const bookableSlots = allSlots.filter(slot => {
-    // Robuste Prüfung
-    const dateStr = slot.date || slot.slot_id;
-    if (!dateStr) return false;
-    
-    const capacity = parseInt(slot.capacity) || MAX_CAPACITY;
-    const booked = parseInt(slot.booked) || 0;
-    const free = capacity - booked;
-    
-    return isFuture(dateStr) && free > 0;
-  });
+function renderDropdown() {
+  const select = document.getElementById("slot_id");
+  if (!select) {
+    console.error("slot_id nicht gefunden");
+    return;
+  }
   
-  console.log(`${bookableSlots.length} buchbare Termine gefunden`);
+  // Nur buchbare Slots
+  const bookable = allSlots
+    .map(s => {
+      const dateStr = s.date || s.slot_id || "";
+      return {
+        id: s.slot_id || dateStr,
+        date: dateStr,
+        capacity: parseInt(s.capacity) || CONFIG.MAX_PARTICIPANTS,
+        booked: parseInt(s.booked) || 0,
+        start: s.start || CONFIG.COURSE_START,
+        end: s.end || CONFIG.COURSE_END
+      };
+    })
+    .filter(s => {
+      const free = s.capacity - s.booked;
+      return s.date && isFuture(s.date) && free > 0;
+    })
+    .sort((a, b) => {
+      const pa = parseDate(a.date);
+      const pb = parseDate(b.date);
+      if (!pa || !pb) return 0;
+      return new Date(pa.year, pa.month - 1, pa.day) - new Date(pb.year, pb.month - 1, pb.day);
+    });
   
-  elements.slotSelect.innerHTML = '<option value="">Bitte wählen...</option>';
+  console.log(`${bookable.length} buchbare Termine`);
   
-  bookableSlots.forEach(slot => {
-    const capacity = parseInt(slot.capacity) || MAX_CAPACITY;
-    const booked = parseInt(slot.booked) || 0;
-    const free = capacity - booked;
-    const dateStr = slot.date || slot.slot_id;
-    const start = slot.start || COURSE_START;
-    const end = slot.end || COURSE_END;
-    
+  // Dropdown aufbauen
+  select.innerHTML = '<option value="">Bitte wählen...</option>';
+  
+  bookable.forEach(slot => {
+    const free = slot.capacity - slot.booked;
     const option = document.createElement("option");
-    option.value = slot.slot_id || dateStr;
-    option.textContent = `${formatDate(dateStr)} · ${start}–${end} Uhr · ${free} frei`;
+    option.value = slot.id;
+    option.textContent = `${formatDate(slot.date)} · ${slot.start}–${slot.end} Uhr · ${free} frei`;
     option.dataset.free = free;
-    option.dataset.date = dateStr;
-    elements.slotSelect.appendChild(option);
+    select.appendChild(option);
   });
 }
 
 /**
- * Teilnehmerfelder rendern (inkl. Kontaktdaten)
+ * Teilnehmerfelder rendern
  */
 function renderParticipants(count) {
-  elements.participantsContainer.innerHTML = "";
+  const container = document.getElementById("participants");
+  if (!container) return;
+  
+  container.innerHTML = "";
   
   for (let i = 0; i < count; i++) {
-    const box = document.createElement("div");
-    box.className = "participant-box";
-    
-    // Für den ersten Teilnehmer zusätzlich E-Mail und Handynummer abfragen
-    const contactFields = i === 0 ? `
-        <label>
-          E-Mail-Adresse
-          <input type="email" name="email_${i}" id="participant-email-0" placeholder="ihre@email.at" required>
-        </label>
-        <label>
-          Handynummer
-          <input type="tel" name="phone_${i}" id="participant-phone-0" placeholder="+43 664 1234567" required>
-        </label>
-    ` : '';
-    
-    box.innerHTML = `
-      <h4>Teilnehmer ${i + 1}${i === 0 ? ' (Ansprechpartner)' : ''}</h4>
-      <div class="form-grid">
-        <label>
-          Vorname
-          <input type="text" name="first_name_${i}" required>
-        </label>
-        <label>
-          Nachname
-          <input type="text" name="last_name_${i}" required>
-        </label>
-        ${contactFields}
-        <label>
-          Straße
-          <input type="text" name="street_${i}" required>
-        </label>
-        <label>
-          Hausnummer
-          <input type="text" name="house_no_${i}" required>
-        </label>
-        <label>
-          PLZ
-          <input type="text" name="zip_${i}" required pattern="[0-9]{4,5}">
-        </label>
-        <label>
-          Ort
-          <input type="text" name="city_${i}" required>
-        </label>
-      </div>
+    const isFirst = i === 0;
+    const html = `
+      <fieldset class="participant-fieldset">
+        <legend>Teilnehmer ${i + 1}${isFirst ? " (Kontakt)" : ""}</legend>
+        
+        <div class="form-row">
+          <label>
+            Vorname *
+            <input type="text" name="p${i}_first" required>
+          </label>
+          <label>
+            Nachname *
+            <input type="text" name="p${i}_last" required>
+          </label>
+        </div>
+        
+        <div class="form-row">
+          <label>
+            Straße *
+            <input type="text" name="p${i}_street" required>
+          </label>
+          <label class="small">
+            Hausnr. *
+            <input type="text" name="p${i}_house" required>
+          </label>
+        </div>
+        
+        <div class="form-row">
+          <label class="small">
+            PLZ *
+            <input type="text" name="p${i}_zip" required pattern="[0-9]{4,5}">
+          </label>
+          <label>
+            Ort *
+            <input type="text" name="p${i}_city" required>
+          </label>
+        </div>
+        
+        ${isFirst ? `
+          <div class="form-row">
+            <label>
+              E-Mail *
+              <input type="email" name="contact_email" required>
+            </label>
+            <label>
+              Telefon
+              <input type="tel" name="contact_phone">
+            </label>
+          </div>
+        ` : ""}
+      </fieldset>
     `;
-    elements.participantsContainer.appendChild(box);
+    container.insertAdjacentHTML("beforeend", html);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BUCHUNG
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Buchung absenden
+ */
+async function submitBooking(payload) {
+  const response = await fetch(`${CONFIG.API_URL}?action=book`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return await response.json();
+}
+
+/**
+ * Formular verarbeiten
+ */
+async function handleSubmit(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  const btn = form.querySelector('button[type="submit"]');
+  
+  // Button deaktivieren
+  btn.disabled = true;
+  btn.textContent = "Wird gesendet...";
+  
+  try {
+    // Daten sammeln
+    const slotId = formData.get("slot_id");
+    const count = parseInt(formData.get("participants_count")) || 1;
+    const email = formData.get("contact_email");
+    const phone = formData.get("contact_phone") || "";
+    
+    // Validierung
+    if (!slotId) {
+      throw new Error("Bitte wähle einen Termin aus.");
+    }
+    if (!email) {
+      throw new Error("Bitte gib deine E-Mail-Adresse ein.");
+    }
+    
+    // Teilnehmerdaten sammeln
+    const participants = [];
+    for (let i = 0; i < count; i++) {
+      participants.push({
+        first_name: formData.get(`p${i}_first`) || "",
+        last_name: formData.get(`p${i}_last`) || "",
+        street: formData.get(`p${i}_street`) || "",
+        house_no: formData.get(`p${i}_house`) || "",
+        zip: formData.get(`p${i}_zip`) || "",
+        city: formData.get(`p${i}_city`) || ""
+      });
+    }
+    
+    // Payload
+    const payload = {
+      slot_id: slotId,
+      contact_email: email,
+      contact_phone: phone,
+      participants_count: count,
+      participants: participants
+    };
+    
+    console.log("Sende Buchung:", payload);
+    
+    // An API senden
+    const result = await submitBooking(payload);
+    
+    if (result.success) {
+      // Erfolg anzeigen
+      showSuccess(result.booking_id, slotId, count, email);
+    } else {
+      throw new Error(result.error || "Buchung fehlgeschlagen.");
+    }
+    
+  } catch (error) {
+    showMessage(error.message, "error");
+    btn.disabled = false;
+    btn.textContent = "Verbindlich buchen";
   }
 }
 
 /**
- * Erfolgsanzeige rendern
+ * Erfolgsanzeige
  */
-function showSuccess(bookingId, date, count, email) {
-  // Formular verstecken
-  document.querySelectorAll(".card").forEach(card => {
-    if (!card.classList.contains("success-card")) {
-      card.classList.add("hidden");
-    }
-  });
+function showSuccess(bookingId, slotId, count, email) {
+  // Formular ausblenden
+  const formSection = document.querySelector(".booking-form-section");
+  if (formSection) formSection.style.display = "none";
   
-  // Erfolgsanzeige befüllen und zeigen
-  elements.successBookingId.textContent = bookingId;
-  elements.successDate.textContent = formatDate(date);
-  elements.successCount.textContent = `${count} ${count === 1 ? "Person" : "Personen"}`;
-  elements.successEmail.textContent = email;
-  elements.successSection.classList.remove("hidden");
+  // Erfolg anzeigen
+  const successSection = document.getElementById("success-section");
+  if (successSection) {
+    successSection.style.display = "block";
+    
+    // Werte eintragen
+    const idEl = document.getElementById("success-id");
+    const dateEl = document.getElementById("success-date");
+    const countEl = document.getElementById("success-count");
+    const emailEl = document.getElementById("success-email");
+    
+    if (idEl) idEl.textContent = bookingId || generateBookingId();
+    if (dateEl) dateEl.textContent = formatDate(slotId);
+    if (countEl) countEl.textContent = count;
+    if (emailEl) emailEl.textContent = email;
+  }
   
   // Nach oben scrollen
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// ══════════════════════════════════════════════════════════════
-// EVENT HANDLER
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// INITIALISIERUNG
+// ══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Monatsfilter ändern
- */
-elements.monthFilter.addEventListener("change", (e) => {
-  selectedMonth = e.target.value;
-  renderSlots();
-});
-
-/**
- * Slot-Auswahl ändern → Max Teilnehmer anpassen
- */
-elements.slotSelect.addEventListener("change", (e) => {
-  const selected = e.target.options[e.target.selectedIndex];
-  if (selected && selected.dataset.free) {
-    const maxFree = parseInt(selected.dataset.free);
-    elements.participantCount.max = Math.min(maxFree, MAX_CAPACITY);
-    
-    // Falls aktuelle Anzahl > verfügbar, reduzieren
-    if (parseInt(elements.participantCount.value) > maxFree) {
-      elements.participantCount.value = maxFree;
-      renderParticipants(maxFree);
-    }
-  }
-});
-
-/**
- * Teilnehmeranzahl ändern
- */
-elements.participantCount.addEventListener("input", (e) => {
-  let count = parseInt(e.target.value) || 1;
-  count = Math.max(1, Math.min(count, parseInt(e.target.max) || MAX_CAPACITY));
-  e.target.value = count;
-  renderParticipants(count);
-});
-
-/**
- * Formular absenden
- */
-elements.bookingForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  clearMessage();
+async function init() {
+  console.log("🏌️ Platzreife App v3.0 gestartet");
   
-  // Validierung
-  const slotId = elements.slotSelect.value;
-  if (!slotId) {
-    showMessage("Bitte wählen Sie einen Termin.", "error");
-    return;
+  // 1. Slots laden
+  allSlots = await fetchSlots();
+  console.log(`${allSlots.length} Termine geladen`);
+  
+  // Fallback: Wenn immer noch leer, statische Termine verwenden
+  if (allSlots.length === 0) {
+    allSlots = generateStaticSlots();
+    console.log(`Fallback: ${allSlots.length} statische Termine`);
   }
   
-  const count = parseInt(elements.participantCount.value);
-  if (count < 1 || count > MAX_CAPACITY) {
-    showMessage("Ungültige Teilnehmeranzahl.", "error");
-    return;
-  }
+  // 2. UI rendern
+  renderTermine();
+  renderDropdown();
+  renderParticipants(1);
   
-  // E-Mail und Handynummer vom ersten Teilnehmer holen
-  const emailInput = document.getElementById("participant-email-0");
-  const phoneInput = document.getElementById("participant-phone-0");
-  
-  const email = emailInput ? emailInput.value.trim() : "";
-  const phone = phoneInput ? phoneInput.value.trim() : "";
-  
-  if (!email) {
-    showMessage("Bitte geben Sie die E-Mail-Adresse des Ansprechpartners ein.", "error");
-    return;
-  }
-  
-  if (!phone) {
-    showMessage("Bitte geben Sie die Handynummer des Ansprechpartners ein.", "error");
-    return;
-  }
-  
-  if (!elements.agbCheckbox.checked || !elements.privacyCheckbox.checked) {
-    showMessage("Bitte akzeptieren Sie die AGB und Datenschutzerklärung.", "error");
-    return;
-  }
-  
-  // Teilnehmerdaten sammeln
-  const participants = [];
-  for (let i = 0; i < count; i++) {
-    const firstName = document.querySelector(`[name="first_name_${i}"]`).value.trim();
-    const lastName = document.querySelector(`[name="last_name_${i}"]`).value.trim();
-    const street = document.querySelector(`[name="street_${i}"]`).value.trim();
-    const houseNo = document.querySelector(`[name="house_no_${i}"]`).value.trim();
-    const zip = document.querySelector(`[name="zip_${i}"]`).value.trim();
-    const city = document.querySelector(`[name="city_${i}"]`).value.trim();
-    
-    if (!firstName || !lastName || !street || !houseNo || !zip || !city) {
-      showMessage(`Bitte füllen Sie alle Felder für Teilnehmer ${i + 1} aus.`, "error");
-      return;
-    }
-    
-    participants.push({
-      first_name: firstName,
-      last_name: lastName,
-      street: street,
-      house_no: houseNo,
-      zip: zip,
-      city: city
+  // 3. Event Listener (nur wenn Elemente existieren)
+  const countInput = document.getElementById("participants_count");
+  if (countInput) {
+    countInput.addEventListener("input", (e) => {
+      let val = parseInt(e.target.value) || 1;
+      val = Math.max(1, Math.min(CONFIG.MAX_PARTICIPANTS, val));
+      
+      // Prüfen ob genug Plätze frei sind
+      const select = document.getElementById("slot_id");
+      if (select && select.value) {
+        const option = select.options[select.selectedIndex];
+        const free = parseInt(option.dataset.free) || CONFIG.MAX_PARTICIPANTS;
+        val = Math.min(val, free);
+      }
+      
+      e.target.value = val;
+      renderParticipants(val);
     });
   }
   
-  // Payload zusammenstellen
-  const payload = {
-    slot_id: slotId,
-    contact_email: email,
-    contact_phone: phone,
-    participants: participants,
-    agb_accepted: true,
-    privacy_accepted: true
-  };
-  
-  // Button deaktivieren
-  elements.submitBtn.disabled = true;
-  elements.submitBtn.textContent = "Wird gesendet...";
-  showMessage("Buchung wird verarbeitet...", "loading");
-  
-  try {
-    const result = await submitBooking(payload);
-    
-    if (result.ok) {
-      // Erfolg!
-      const selectedOption = elements.slotSelect.options[elements.slotSelect.selectedIndex];
-      showSuccess(result.booking_id, selectedOption.dataset.date, count, email);
-    } else {
-      // Fehler vom Backend
-      showMessage(result.message || "Buchung fehlgeschlagen. Bitte versuchen Sie es erneut.", "error");
-      elements.submitBtn.disabled = false;
-      elements.submitBtn.textContent = "Verbindlich buchen";
-    }
-  } catch (error) {
-    console.error("Buchungsfehler:", error);
-    showMessage("Verbindungsfehler. Bitte versuchen Sie es später erneut.", "error");
-    elements.submitBtn.disabled = false;
-    elements.submitBtn.textContent = "Verbindlich buchen";
-  }
-});
-
-// ══════════════════════════════════════════════════════════════
-// INITIALISIERUNG
-// ══════════════════════════════════════════════════════════════
-
-async function init() {
-  // Slots laden (mit Timeout-Fallback)
-  try {
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Timeout")), 5000)
-    );
-    allSlots = await Promise.race([fetchSlots(), timeoutPromise]);
-  } catch (error) {
-    console.warn("Fallback auf statische Termine:", error);
-    allSlots = generateStaticSlots();
+  const form = document.getElementById("booking-form");
+  if (form) {
+    form.addEventListener("submit", handleSubmit);
   }
   
-  // Sicherstellen, dass immer Slots vorhanden sind
-  if (!allSlots || allSlots.length === 0) {
-    console.warn("Keine Slots geladen, verwende statische Termine");
-    allSlots = generateStaticSlots();
+  const newBookingBtn = document.getElementById("new-booking");
+  if (newBookingBtn) {
+    newBookingBtn.addEventListener("click", () => {
+      location.reload();
+    });
   }
   
-  console.log(`${allSlots.length} Termine geladen`);
-  console.log("Erster Slot:", JSON.stringify(allSlots[0]));
-  
-  // Debug: Prüfen wie viele Termine in Zukunft liegen
-  const today = new Date().toISOString().split("T")[0];
-  console.log("Heute:", today);
-  const futureCount = allSlots.filter(s => {
-    const d = s.date || s.slot_id;
-    return d && d >= today;
-  }).length;
-  console.log(`${futureCount} Termine in der Zukunft`);
-  
-  // UI rendern
-  renderMonthFilter();
-  renderSlots();
-  renderSlotSelect();
-  renderParticipants(1);
+  console.log("✓ App initialisiert");
 }
 
-
-
 // Start
-init();
-
+document.addEventListener("DOMContentLoaded", init);

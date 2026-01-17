@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Platzreife Buchungsseite – Golfclub Metzenhof – v2.3 (17.01.2026) -->
+<!-- Platzreife Buchungsseite – Golfclub Metzenhof – v3.0 (17.01.2026) -->
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -46,9 +46,8 @@
      MAIN CONTENT
      ═══════════════════════════════════════════════════════════ -->
 <main class="container">
-    
   
-  <!-- TERMINE ÜBERSICHT – Neu gebaut -->
+  <!-- TERMINE ÜBERSICHT -->
   <section class="card termine-section">
     <div class="card-header">
       <h2>Verfügbare Termine</h2>
@@ -64,64 +63,59 @@
   </section>
   
   <!-- BUCHUNGSFORMULAR -->
-  <section class="card">
+  <section class="card booking-form-section">
     <div class="card-header">
       <h2>Jetzt buchen</h2>
     </div>
     
     <form id="booking-form">
       <!-- Terminauswahl -->
-      <label for="slot-select">
+      <label for="slot_id">
         Gewünschter Termin
-        <select id="slot-select" required>
+        <select id="slot_id" name="slot_id" required>
           <option value="">Bitte wählen...</option>
         </select>
       </label>
       
-      
       <!-- Teilnehmeranzahl -->
-      <label for="participant-count">
+      <label for="participants_count">
         Anzahl Teilnehmer (1–8)
-        <input type="number" id="participant-count" min="1" max="8" value="1" required>
+        <input type="number" id="participants_count" name="participants_count" min="1" max="8" value="1" required>
       </label>
       
-      <!-- Teilnehmerdaten (inkl. Kontaktdaten) -->
+      <!-- Teilnehmerdaten -->
       <h3>Teilnehmerdaten</h3>
-      <div id="participants-container"></div>
-      
-      <!-- Versteckte Kontaktfelder (werden aus erstem Teilnehmer befüllt) -->
-      <input type="hidden" id="contact-email">
-      <input type="hidden" id="contact-phone">
+      <div id="participants"></div>
       
       <!-- Checkboxen -->
       <div class="checkbox-group">
         <label class="checkbox-item">
-          <input type="checkbox" id="agb-checkbox" class="checkbox-square" required>
+          <input type="checkbox" class="checkbox-square" required>
           <span>Ich akzeptiere die <a href="agb.html" target="_blank">AGB</a>.</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" id="privacy-checkbox" class="checkbox-square" required>
+          <input type="checkbox" class="checkbox-square" required>
           <span>Ich habe die <a href="privacy.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</span>
         </label>
       </div>
       
       <!-- Submit -->
-      <button type="submit" id="submit-btn">Verbindlich buchen</button>
+      <button type="submit">Verbindlich buchen</button>
       
       <!-- Nachrichten -->
-      <div id="form-message" class="message"></div>
+      <div id="message" class="message" style="display:none;"></div>
     </form>
   </section>
   
   <!-- ERFOLGSANZEIGE (initial versteckt) -->
-  <section id="success-section" class="card success-card hidden">
+  <section id="success-section" class="card success-card" style="display:none;">
     <div class="success-icon">✓</div>
     <h2>Buchung erfolgreich!</h2>
     
     <div class="booking-details">
       <div class="detail-row">
         <span class="detail-label">Buchungs-ID</span>
-        <span class="detail-value" id="success-booking-id">–</span>
+        <span class="detail-value" id="success-id">–</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Termin</span>
@@ -143,7 +137,7 @@
       <p><strong>info@metzenhof.at</strong> · <strong>+43 7225 7389</strong></p>
     </div>
     
-    <button type="button" onclick="location.reload()" class="btn-secondary">Weitere Buchung</button>
+    <button type="button" id="new-booking" class="btn-secondary">Weitere Buchung</button>
   </section>
   
 </main>
