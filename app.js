@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * PLATZREIFE BUCHUNGSSYSTEM – VERSION 4.0
- * Golfclub Metzenhof – 17.01.2026
+ * PLATZREIFE BUCHUNGSSYSTEM – VERSION 4.1
+ * Golfclub Metzenhof – 17.01.2026 – Fix: Deduplizierung + URL-Encoding
  * 
  * Zwei-Seiten-System:
  * - index.html: Terminübersicht (klickbar → weiter zu buchen.html)
@@ -199,13 +199,25 @@ async function fetchSlots() {
 }
 
 /**
+ * ISO-Datum zu YYYY-MM-DD konvertieren
+ */
+function toDateId(input) {
+  const p = parseDate(input);
+  if (!p) return input;
+  return `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}`;
+}
+
+/**
  * Slot normalisieren
  */
 function normalizeSlot(s) {
-  const dateStr = s.date || s.slot_id || "";
+  const rawDate = s.date || s.slot_id || "";
+  const dateId = toDateId(rawDate); // Konvertiere zu YYYY-MM-DD
+  
   return {
-    id: s.slot_id || dateStr,
-    date: dateStr,
+    id: dateId, // Immer YYYY-MM-DD als ID
+    date: rawDate,
+    dateId: dateId,
     capacity: parseInt(s.capacity) || CONFIG.MAX_PARTICIPANTS,
     booked: parseInt(s.booked) || 0,
     start: s.start || CONFIG.COURSE_START,
@@ -214,12 +226,15 @@ function normalizeSlot(s) {
 }
 
 /**
- * Slot nach ID finden
+ * Slot nach ID finden (sucht nach dateId im YYYY-MM-DD Format)
  */
 function findSlotById(slotId) {
+  // Normalisiere die gesuchte ID auch zu YYYY-MM-DD
+  const searchId = toDateId(slotId) || slotId;
+  
   return allSlots.find(s => {
     const normalized = normalizeSlot(s);
-    return normalized.id === slotId || normalized.date === slotId;
+    return normalized.dateId === searchId || normalized.id === searchId;
   });
 }
 
@@ -234,10 +249,25 @@ function renderTermineGrid() {
   const container = document.getElementById("slots-container");
   if (!container) return;
   
-  // Slots normalisieren und filtern
-  const slots = allSlots
-    .map(normalizeSlot)
-    .filter(s => s.date && isFuture(s.date))
+  // Slots normalisieren
+  const normalized = allSlots.map(normalizeSlot);
+  
+  // Deduplizieren nach dateId (YYYY-MM-DD)
+  const uniqueMap = new Map();
+  for (const slot of normalized) {
+    if (!slot.dateId || !isFuture(slot.date)) continue;
+    
+    // Wenn Datum schon existiert, Buchungen addieren
+    if (uniqueMap.has(slot.dateId)) {
+      const existing = uniqueMap.get(slot.dateId);
+      existing.booked = Math.max(existing.booked, slot.booked);
+    } else {
+      uniqueMap.set(slot.dateId, { ...slot });
+    }
+  }
+  
+  // Zu Array konvertieren und sortieren
+  const slots = Array.from(uniqueMap.values())
     .sort((a, b) => {
       const pa = parseDate(a.date);
       const pb = parseDate(b.date);
@@ -245,7 +275,7 @@ function renderTermineGrid() {
       return new Date(pa.year, pa.month - 1, pa.day) - new Date(pb.year, pb.month - 1, pb.day);
     });
   
-  console.log(`${slots.length} zukünftige Termine`);
+  console.log(`${slots.length} einzigartige zukünftige Termine`);
   
   if (slots.length === 0) {
     container.innerHTML = '<div class="termine-empty">Aktuell keine Termine verfügbar.</div>';
@@ -597,7 +627,7 @@ function showSuccess(bookingId, slotId, count, email) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function init() {
-  console.log("🏌️ Platzreife App v4.0 gestartet");
+  console.log("🏌️ Platzreife App v4.1 gestartet");
   
   // Slots laden
   allSlots = await fetchSlots();

@@ -3,7 +3,7 @@
  * PLATZREIFE – Golfclub Metzenhof
  * Design basierend auf www.metzenhof.at/unser-golfplatz/
  * „mitanaund genießen"
- * Version: 4.0 (17.01.2026) – Zwei-Seiten-System
+ * Version: 4.1 (17.01.2026) – Responsive + Browser-Kompatibilität
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -1613,6 +1613,7 @@ a:focus-visible {
   flex-direction: column;
   align-items: center;
   background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -1882,4 +1883,316 @@ a:focus-visible {
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ERWEITERTE RESPONSIVE STYLES – Browser-Kompatibilität
+   Version 4.1 – Alle gängigen Browser (Chrome, Firefox, Safari, Edge, Mobile)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Large Tablet / Small Desktop (1024px) */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 2rem;
+  }
+  
+  .termine-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .hero-description {
+    max-width: 90%;
+  }
+}
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+  .termine-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  .termin-card {
+    min-height: 160px;
+    padding: 1rem;
+  }
+  
+  .termin-day {
+    font-size: 2rem;
+  }
+  
+  .hero-compact .hero-logos {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .back-link {
+    order: 2;
+    margin-top: 0.5rem;
+  }
+  
+  .hero-logo-gemma-small {
+    order: 1;
+  }
+  
+  .selected-slot-info {
+    padding: 1rem;
+  }
+  
+  .slot-info-date {
+    font-size: 1.25rem;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row label {
+    width: 100%;
+  }
+  
+  .form-row label.small {
+    width: 100%;
+  }
+}
+
+/* Mobile (600px) */
+@media (max-width: 600px) {
+  html {
+    font-size: 15px;
+  }
+  
+  .hero-compact {
+    padding: 1.5rem 1rem;
+  }
+  
+  .hero-title-booking {
+    font-size: 1.25rem;
+  }
+  
+  .selected-date-badge {
+    padding: 0.5rem 1rem;
+  }
+  
+  .selected-date-value {
+    font-size: 1rem;
+  }
+  
+  .participant-fieldset {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .participant-fieldset legend {
+    font-size: 0.875rem;
+  }
+  
+  button[type="submit"] {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .success-buttons {
+    flex-direction: column;
+  }
+  
+  .success-buttons .btn-primary,
+  .success-buttons .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .error-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .error-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Small Mobile (480px) */
+@media (max-width: 480px) {
+  .termine-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .termin-card {
+    min-height: 140px;
+    padding: 0.875rem;
+  }
+  
+  .termin-weekday {
+    font-size: 0.6875rem;
+  }
+  
+  .termin-day {
+    font-size: 1.75rem;
+  }
+  
+  .termin-month {
+    font-size: 0.75rem;
+  }
+  
+  .termin-status {
+    font-size: 0.75rem;
+  }
+  
+  .termin-status-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 0.625rem;
+  }
+  
+  .termin-action {
+    font-size: 0.6875rem;
+  }
+  
+  .hero-eyecatcher {
+    gap: 0.5rem;
+  }
+  
+  .eyecatcher-main {
+    font-size: clamp(1.5rem, 8vw, 2.5rem);
+  }
+  
+  .eyecatcher-year {
+    font-size: clamp(1.25rem, 6vw, 2rem);
+  }
+  
+  .price-amount {
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+}
+
+/* Extra Small (360px) */
+@media (max-width: 360px) {
+  .termine-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .termin-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: auto;
+    padding: 1rem;
+  }
+  
+  .termin-card > div:first-child {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .card {
+    padding: 1.25rem 1rem;
+    margin: 1rem 0;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BROWSER-SPEZIFISCHE FIXES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Firefox: Scrollbar Styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-bg);
+}
+
+/* Webkit (Chrome, Safari, Edge): Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Safari: Tap Highlight deaktivieren */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* IE11/Edge Legacy: Flexbox Fixes (falls noch benötigt) */
+@supports not (display: grid) {
+  .termine-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .termin-card {
+    flex: 0 0 calc(50% - 0.5rem);
+    margin: 0.25rem;
+  }
+}
+
+/* Fallback für backdrop-filter (ältere Browser) */
+@supports not (backdrop-filter: blur(10px)) {
+  .hero-price-badge,
+  .selected-date-badge {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Reduced Motion: Animationen deaktivieren für Barrierefreiheit */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Dark Mode Unterstützung (optional, falls gewünscht) */
+@media (prefers-color-scheme: dark) {
+  /* Aktuell nicht aktiv – bei Bedarf aktivieren */
+}
+
+/* Print Styles */
+@media print {
+  .hero-price-badge,
+  .termin-action,
+  .footer,
+  button,
+  .back-link {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
 }
