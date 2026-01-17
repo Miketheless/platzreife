@@ -94,6 +94,40 @@ function jsonResponse(data) {
 }
 
 /**
+ * GLOBALE HILFSFUNKTION: Datum-Teil aus verschiedenen Formaten extrahieren
+ * Gibt immer YYYY-MM-DD zurück (lokale Zeitzone für Date-Objekte)
+ */
+function extractSlotDateId(value) {
+  if (!value) return "";
+  
+  // Wenn es ein Date-Objekt ist (aus Google Sheets)
+  if (value instanceof Date) {
+    // Lokale Zeitzone verwenden (wie in Google Sheets angezeigt)
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, '0');
+    const d = String(value.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  
+  // Wenn es ein String ist
+  const str = String(value).trim();
+  
+  // ISO-Format mit T: 2026-02-24T23:00:00.000Z
+  // Hier nur den Teil vor T nehmen
+  if (str.includes('T')) {
+    return str.split('T')[0];
+  }
+  
+  // Bereits im Format YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return str;
+  }
+  
+  // Fallback
+  return str;
+}
+
+/**
  * Datum formatieren für E-Mail
  */
 function formatDateForEmail(dateValue) {
@@ -323,34 +357,11 @@ function handleBook(payload) {
     let slotRowIndex = -1;
     let slotData = null;
     
-    // Hilfsfunktion: Datum-Teil aus ISO-String oder Date extrahieren (YYYY-MM-DD)
-    function extractDatePart(value) {
-      if (!value) return "";
-      // Wenn es ein Date-Objekt ist
-      if (value instanceof Date) {
-        const y = value.getFullYear();
-        const m = String(value.getMonth() + 1).padStart(2, '0');
-        const d = String(value.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-      // Wenn es ein String ist
-      const str = String(value);
-      // ISO-Format: 2026-02-24T23:00:00.000Z -> 2026-02-24
-      if (str.includes('T')) {
-        return str.split('T')[0];
-      }
-      // Bereits im Format YYYY-MM-DD
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-        return str;
-      }
-      return str;
-    }
-    
-    const searchDate = extractDatePart(payload.slot_id);
+    const searchDate = extractSlotDateId(payload.slot_id);
     console.log("Suche nach Datum:", searchDate);
     
     for (let i = 1; i < slotsData.length; i++) {
-      const slotDatePart = extractDatePart(slotsData[i][0]);
+      const slotDatePart = extractSlotDateId(slotsData[i][0]);
       
       // Vergleiche Datum-Teile (ignoriere Zeitzone)
       if (slotDatePart === searchDate) {
@@ -821,23 +832,10 @@ function handleAdminCancel(params) {
     const slotsData = slotsSheet.getDataRange().getValues();
     
     // Slot per Datum finden (flexible Suche)
-    function extractDatePart(value) {
-      if (!value) return "";
-      if (value instanceof Date) {
-        const y = value.getFullYear();
-        const m = String(value.getMonth() + 1).padStart(2, '0');
-        const d = String(value.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-      const str = String(value);
-      if (str.includes('T')) return str.split('T')[0];
-      return str;
-    }
-    
-    const searchDate = extractDatePart(slotId);
+    const searchDate = extractSlotDateId(slotId);
     
     for (let i = 1; i < slotsData.length; i++) {
-      const slotDatePart = extractDatePart(slotsData[i][0]);
+      const slotDatePart = extractSlotDateId(slotsData[i][0]);
       if (slotDatePart === searchDate) {
         const currentBooked = slotsData[i][5] || 0;
         const newBooked = Math.max(0, currentBooked - participantCount);
@@ -914,26 +912,13 @@ function handleAdminRestore(params) {
     const slotsSheet = getSheet(SHEET_SLOTS);
     const slotsData = slotsSheet.getDataRange().getValues();
     
-    function extractDatePart(value) {
-      if (!value) return "";
-      if (value instanceof Date) {
-        const y = value.getFullYear();
-        const m = String(value.getMonth() + 1).padStart(2, '0');
-        const d = String(value.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-      const str = String(value);
-      if (str.includes('T')) return str.split('T')[0];
-      return str;
-    }
-    
-    const searchDate = extractDatePart(slotId);
+    const searchDate = extractSlotDateId(slotId);
     let slotRowIndex = -1;
     let slotCapacity = 0;
     let slotBooked = 0;
     
     for (let i = 1; i < slotsData.length; i++) {
-      const slotDatePart = extractDatePart(slotsData[i][0]);
+      const slotDatePart = extractSlotDateId(slotsData[i][0]);
       if (slotDatePart === searchDate) {
         slotRowIndex = i + 1;
         slotCapacity = slotsData[i][4] || 8;
@@ -1010,25 +995,16 @@ function handleAdminAddBooking(params) {
     const slotsSheet = getSheet(SHEET_SLOTS);
     const slotsData = slotsSheet.getDataRange().getValues();
     
-    function extractDatePart(value) {
-      if (!value) return "";
-      if (value instanceof Date) {
-        const y = value.getFullYear();
-        const m = String(value.getMonth() + 1).padStart(2, '0');
-        const d = String(value.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-      const str = String(value);
-      if (str.includes('T')) return str.split('T')[0];
-      return str;
-    }
+    const searchDate = extractSlotDateId(payload.slot_id);
+    console.log("Admin-Buchung: Suche nach Datum:", searchDate);
     
-    const searchDate = extractDatePart(payload.slot_id);
     let slotRowIndex = -1;
     let slotData = null;
     
     for (let i = 1; i < slotsData.length; i++) {
-      const slotDatePart = extractDatePart(slotsData[i][0]);
+      const slotDatePart = extractSlotDateId(slotsData[i][0]);
+      console.log(`  Slot ${i}: ${slotsData[i][0]} -> ${slotDatePart}`);
+      
       if (slotDatePart === searchDate) {
         slotRowIndex = i + 1;
         slotData = {
@@ -1036,12 +1012,14 @@ function handleAdminAddBooking(params) {
           capacity: slotsData[i][4] || 8,
           booked: slotsData[i][5] || 0
         };
+        console.log("  -> Gefunden!");
         break;
       }
     }
     
     if (!slotData) {
-      return jsonResponse({ ok: false, message: "Termin nicht gefunden" });
+      console.log("Kein Slot gefunden für:", searchDate);
+      return jsonResponse({ ok: false, message: "Termin nicht gefunden: " + searchDate });
     }
     
     const freeSlots = slotData.capacity - slotData.booked;
