@@ -14,7 +14,7 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbzeT3syS3BN25_HR9QJ-qzHETYSTyz_Z61KxvIa8K0nr5b8XzIGr6A-FwyERn_DU3Dl_A/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbyBri3o1A6uQONKsX7Wa7m_mW6Zi3iC6z5Bf9wI4EDIKN-3CoNWx7DsymRqA_98NgXx2A/exec",
   MAX_PARTICIPANTS: 8,
   COURSE_START: "09:00",
   COURSE_END: "15:00",
@@ -625,12 +625,25 @@ async function handleSubmit(e) {
       });
     }
     
+    // AGB und Datenschutz Checkboxen prüfen
+    const agbCheckbox = document.getElementById("agb_accepted");
+    const privacyCheckbox = document.getElementById("privacy_accepted");
+    
+    const agbAccepted = agbCheckbox ? agbCheckbox.checked : false;
+    const privacyAccepted = privacyCheckbox ? privacyCheckbox.checked : false;
+    
+    if (!agbAccepted || !privacyAccepted) {
+      throw new Error("Bitte akzeptiere die AGB und Datenschutzerklärung.");
+    }
+    
     const payload = {
       slot_id: slotId,
       contact_email: email,
       contact_phone: phone,
       participants_count: count,
-      participants: participants
+      participants: participants,
+      agb_accepted: agbAccepted,
+      privacy_accepted: privacyAccepted
     };
     
     console.log("Sende Buchung:", payload);
