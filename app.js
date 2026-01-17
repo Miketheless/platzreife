@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * PLATZREIFE – Frontend JavaScript
- * Golfclub Metzenhof – Version 2.2 (17.01.2026) – Robuste Datumserkennung
+ * Golfclub Metzenhof – Version 2.3 (17.01.2026) – Neue Termin-Karten
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -239,9 +239,15 @@ function renderMonthFilter() {
 
 
 /**
- * Slots-Übersicht – Modern & Einfach
+ * Slots-Übersicht – Neu gebaut mit Karten-Design
  */
 function renderSlots() {
+  const container = document.getElementById("slots-container");
+  if (!container) {
+    console.error("slots-container nicht gefunden");
+    return;
+  }
+  
   // Robuste Slot-Extraktion
   const futureSlots = allSlots
     .map(slot => {
@@ -251,48 +257,63 @@ function renderSlots() {
       return { ...slot, date: dateStr, capacity, booked };
     })
     .filter(s => s.date && isFuture(s.date))
-    .sort((a, b) => a.date.localeCompare(b.date));
-  
-  const container = document.getElementById("slots-container");
-  if (!container) {
-    console.error("slots-container nicht gefunden");
-    return;
-  }
+    .sort((a, b) => {
+      // Sortierung nach normalisiertem Datum
+      const pa = parseDate(a.date);
+      const pb = parseDate(b.date);
+      if (!pa || !pb) return 0;
+      const da = new Date(pa.year, pa.month - 1, pa.day);
+      const db = new Date(pb.year, pb.month - 1, pb.day);
+      return da - db;
+    });
   
   console.log(`${futureSlots.length} zukünftige Termine für Anzeige`);
   
   if (futureSlots.length === 0) {
-    container.innerHTML = '<div class="slots-empty">Aktuell keine Termine verfügbar.</div>';
+    container.innerHTML = '<div class="termine-empty">Aktuell keine Termine verfügbar.</div>';
     return;
   }
   
-  // Moderne Chip-Ansicht
+  // Wochentage (kurz)
+  const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+  const MONTHS_SHORT = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+  
+  // Termin-Karten erstellen
   container.innerHTML = futureSlots.map(slot => {
-    const free = slot.capacity - slot.booked;
-    let statusClass = "open";
-    let statusText = `${free} frei`;
-    
-    if (free === 0) {
-      statusClass = "full";
-      statusText = "ausgebucht";
-    } else if (free <= 2) {
-      statusClass = "few";
-      statusText = `nur ${free} frei`;
-    }
-    
-    // Formatierung: "Mi 25. Feb"
     const parsed = parseDate(slot.date);
     if (!parsed) return "";
     
+    const free = slot.capacity - slot.booked;
     const dateObj = new Date(parsed.year, parsed.month - 1, parsed.day);
-    const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][dateObj.getDay()];
-    const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-    const displayDate = `${weekday} ${parsed.day}. ${monthNames[parsed.month - 1]}`;
+    const weekday = WEEKDAYS_SHORT[dateObj.getDay()];
+    const monthName = MONTHS_SHORT[parsed.month - 1];
     
-    return `<div class="slot-chip ${statusClass}">
-      <span class="chip-date">${displayDate}</span>
-      <span class="chip-status">${statusText}</span>
-    </div>`;
+    // Status bestimmen
+    let statusClass = "";
+    let statusIcon = "✓";
+    let statusText = `${free} Plätze frei`;
+    
+    if (free === 0) {
+      statusClass = "full";
+      statusIcon = "✕";
+      statusText = "Ausgebucht";
+    } else if (free <= 2) {
+      statusClass = "few";
+      statusIcon = "!";
+      statusText = `Nur ${free} frei`;
+    }
+    
+    return `
+      <div class="termin-card ${statusClass}">
+        <div class="termin-weekday">${weekday}</div>
+        <div class="termin-day">${parsed.day}</div>
+        <div class="termin-month">${monthName} ${parsed.year}</div>
+        <div class="termin-status">
+          <span class="termin-status-icon">${statusIcon}</span>
+          ${statusText}
+        </div>
+      </div>
+    `;
   }).join("");
 }
 
