@@ -1,4 +1,4 @@
-# 🏌️ Platzreife Online-Buchungssystem (v2.0)
+# 🏌️ Platzreife Online-Buchungssystem (v2.1)
 
 **Golfclub Metzenhof – Platzreife-Kurs Buchungsplattform**
 

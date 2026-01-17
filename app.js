@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * PLATZREIFE – Frontend JavaScript
- * Golfclub Metzenhof – Version 2.0 (16.01.2026)
+ * Golfclub Metzenhof – Version 2.1 (17.01.2026)
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -500,8 +500,24 @@ elements.bookingForm.addEventListener("submit", async (e) => {
 // ══════════════════════════════════════════════════════════════
 
 async function init() {
-  // Slots laden
-  allSlots = await fetchSlots();
+  // Slots laden (mit Timeout-Fallback)
+  try {
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout")), 5000)
+    );
+    allSlots = await Promise.race([fetchSlots(), timeoutPromise]);
+  } catch (error) {
+    console.warn("Fallback auf statische Termine:", error);
+    allSlots = generateStaticSlots();
+  }
+  
+  // Sicherstellen, dass immer Slots vorhanden sind
+  if (!allSlots || allSlots.length === 0) {
+    console.warn("Keine Slots geladen, verwende statische Termine");
+    allSlots = generateStaticSlots();
+  }
+  
+  console.log(`${allSlots.length} Termine geladen`);
   
   // UI rendern
   renderMonthFilter();
