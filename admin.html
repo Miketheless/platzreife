@@ -22,30 +22,27 @@
     
     .admin-table {
       width: 100%;
-      min-width: 1200px;
+      min-width: 1100px;
       border-collapse: collapse;
       font-size: 0.8rem;
-      table-layout: fixed;
     }
     
     .admin-table th,
     .admin-table td {
-      padding: 0.4rem 0.3rem;
+      padding: 0.5rem 0.4rem;
       text-align: left;
       border-bottom: 1px solid #e0e0e0;
       vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     
     .admin-table th {
       background: var(--color-primary);
       color: white;
       font-weight: 600;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       cursor: pointer;
       user-select: none;
-      white-space: nowrap;
     }
     
     .admin-table th:hover {
@@ -76,16 +73,17 @@
       text-decoration: line-through;
     }
     
-    /* Spaltenbreiten */
-    .col-id { width: 80px; }
-    .col-date { width: 90px; }
-    .col-email { width: 150px; }
-    .col-phone { width: 100px; }
-    .col-count { width: 40px; text-align: center; }
-    .col-check { width: 60px; text-align: center; }
-    .col-paid { width: 110px; }
-    .col-status { width: 80px; }
-    .col-action { width: 100px; }
+    /* Checkbox/Date Spalten zentriert */
+    .admin-table td:nth-child(6),
+    .admin-table td:nth-child(7),
+    .admin-table td:nth-child(8),
+    .admin-table td:nth-child(9),
+    .admin-table th:nth-child(6),
+    .admin-table th:nth-child(7),
+    .admin-table th:nth-child(8),
+    .admin-table th:nth-child(9) {
+      text-align: center;
+    }
     
     /* Inputs */
     .admin-checkbox {
@@ -380,6 +378,44 @@
     
     .modal-close:hover { color: #333; }
     
+    /* Teilnehmerliste im Modal */
+    .modal-participant-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .modal-participant-item:last-child {
+      border-bottom: none;
+    }
+    
+    .modal-participant-name {
+      font-weight: 600;
+    }
+    
+    .modal-participant-booking {
+      font-size: 0.75rem;
+      color: #666;
+    }
+    
+    .modal-participant-status {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    
+    .modal-participant-status.confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .modal-participant-status.cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
     .modal-form label {
       display: block;
       margin-bottom: 0.3rem;
@@ -516,15 +552,25 @@
 
 <!-- Quick-Book Modal -->
 <div id="quick-book-modal" class="modal-overlay hidden">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width: 600px;">
     <div class="modal-header">
-      <h3>📅 Schnellbuchung</h3>
+      <h3>📅 Termin-Details & Schnellbuchung</h3>
       <button type="button" class="modal-close" id="modal-close">×</button>
     </div>
     <div class="modal-info" id="modal-slot-info">
       <strong>Termin:</strong> <span id="modal-slot-date">–</span><br>
       <strong>Freie Plätze:</strong> <span id="modal-slot-free">–</span>
     </div>
+    
+    <!-- Bestehende Teilnehmer -->
+    <div id="modal-participants-section" style="margin-bottom: 1rem;">
+      <h4 style="margin: 0 0 0.5rem 0; color: var(--color-primary);">👥 Gebuchte Teilnehmer</h4>
+      <div id="modal-participants-list" style="background: #f8f9fa; border-radius: 8px; padding: 0.75rem; font-size: 0.85rem; max-height: 150px; overflow-y: auto;">
+        <p style="color: #999; margin: 0;">Keine Buchungen für diesen Termin.</p>
+      </div>
+    </div>
+    
+    <h4 style="margin: 0 0 0.5rem 0; color: var(--color-primary);">➕ Neuen Teilnehmer hinzufügen</h4>
     <form class="modal-form" id="quick-book-form">
       <input type="hidden" id="modal-slot-id">
       <div class="form-row">

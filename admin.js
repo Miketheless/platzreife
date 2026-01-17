@@ -342,7 +342,58 @@ function openQuickBookModal(slotId, free) {
   elements.quickBookForm.reset();
   elements.modalSlotId.value = slotId;
   
+  // Teilnehmer für diesen Termin anzeigen
+  renderModalParticipants(slotId);
+  
   elements.quickBookModal.classList.remove("hidden");
+}
+
+function renderModalParticipants(slotId) {
+  const container = document.getElementById("modal-participants-list");
+  if (!container) return;
+  
+  // Alle Teilnehmer für diesen Termin finden
+  const participants = [];
+  
+  bookingsData.forEach(booking => {
+    const bookingDateId = extractDateId(booking.slot_id);
+    if (bookingDateId === slotId && booking.participants) {
+      booking.participants.forEach((p, idx) => {
+        participants.push({
+          bookingId: booking.booking_id,
+          status: booking.status,
+          firstName: p.first_name || "",
+          lastName: p.last_name || "",
+          nr: idx + 1
+        });
+      });
+    }
+  });
+  
+  if (participants.length === 0) {
+    container.innerHTML = '<p style="color: #999; margin: 0;">Noch keine Buchungen für diesen Termin.</p>';
+    return;
+  }
+  
+  let html = '';
+  participants.forEach(p => {
+    const isCancelled = p.status === "CANCELLED";
+    html += `
+      <div class="modal-participant-item ${isCancelled ? "cancelled" : ""}">
+        <div>
+          <span class="modal-participant-name ${isCancelled ? "text-muted" : ""}" style="${isCancelled ? "text-decoration: line-through;" : ""}">
+            ${p.firstName} ${p.lastName}
+          </span>
+          <span class="modal-participant-booking">(${p.bookingId})</span>
+        </div>
+        <span class="modal-participant-status ${isCancelled ? "cancelled" : "confirmed"}">
+          ${isCancelled ? "✕ Storno" : "✓ OK"}
+        </span>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
 }
 
 function closeQuickBookModal() {
