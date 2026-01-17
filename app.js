@@ -635,29 +635,26 @@ async function handleSubmit(e) {
     
     console.log("Sende Buchung:", payload);
     
-    // Google Apps Script mit Timeout
+    // Google Apps Script: GET-Request mit Base64-kodierten Daten (CORS-sicher)
+    const payloadBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    const bookingUrl = `${CONFIG.API_URL}?action=book&data=${encodeURIComponent(payloadBase64)}`;
+    
+    console.log("Buchungs-URL:", bookingUrl);
+    
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000); // 30 Sekunden
+    const timeout = setTimeout(() => controller.abort(), 30000);
     
     try {
-      const response = await fetch(`${CONFIG.API_URL}?action=book`, {
-        method: "POST",
-        mode: "cors",
+      const response = await fetch(bookingUrl, {
+        method: "GET",
         redirect: "follow",
-        signal: controller.signal,
-        headers: { 
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
+        signal: controller.signal
       });
       
       clearTimeout(timeout);
       
-      if (!response.ok) {
-        throw new Error(`Server-Fehler: ${response.status}`);
-      }
-      
       const result = await response.json();
+      console.log("Server-Antwort:", result);
       
       if (result.success || result.ok) {
         showSuccess(result.booking_id, slotId, count, email);
@@ -667,18 +664,13 @@ async function handleSubmit(e) {
       
     } catch (fetchError) {
       clearTimeout(timeout);
+      console.error("Fetch-Fehler:", fetchError);
       
       if (fetchError.name === "AbortError") {
         throw new Error("Zeitüberschreitung. Bitte versuche es erneut.");
       }
       
-      // NetworkError bei CORS-Problemen
-      if (fetchError.message.includes("NetworkError") || fetchError.message.includes("Failed to fetch")) {
-        console.error("CORS/Netzwerk-Fehler:", fetchError);
-        throw new Error("Verbindungsfehler zum Server. Bitte prüfe deine Internetverbindung und versuche es erneut.");
-      }
-      
-      throw fetchError;
+      throw new Error("Verbindungsfehler. Bitte versuche es erneut.");
     }
     
   } catch (error) {

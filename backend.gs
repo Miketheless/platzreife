@@ -110,6 +110,7 @@ function formatDateForEmail(dateStr) {
 
 /**
  * HTTP GET Handler
+ * Unterstützt auch Buchungen via GET (für CORS-Kompatibilität)
  */
 function doGet(e) {
   const action = e.parameter.action;
@@ -117,14 +118,52 @@ function doGet(e) {
   switch (action) {
     case "slots":
       return handleGetSlots();
+      
+    case "book":
+      // Buchung via GET mit Base64-kodierten Daten (CORS-sicher)
+      return handleBookViaGet(e.parameter.data);
+      
     case "cancel":
       return handleCancel(e.parameter.token);
+      
     case "admin_bookings":
       return handleAdminBookings(e.parameter.admin_key);
+      
     case "admin_export_csv":
       return handleAdminExportCsv(e.parameter.admin_key);
+      
     default:
       return jsonResponse({ ok: false, message: "Unbekannte Aktion" });
+  }
+}
+
+/**
+ * Buchung via GET-Request verarbeiten (Base64-kodierte Daten)
+ */
+function handleBookViaGet(base64Data) {
+  try {
+    if (!base64Data) {
+      return jsonResponse({ 
+        ok: false, 
+        success: false, 
+        error: "Keine Buchungsdaten übermittelt" 
+      });
+    }
+    
+    // Base64 dekodieren
+    const jsonString = Utilities.newBlob(Utilities.base64Decode(base64Data)).getDataAsString("UTF-8");
+    const payload = JSON.parse(jsonString);
+    
+    // An die normale Buchungsfunktion weiterleiten
+    return handleBook(payload);
+    
+  } catch (error) {
+    console.error("handleBookViaGet Fehler:", error);
+    return jsonResponse({ 
+      ok: false, 
+      success: false, 
+      error: "Fehler beim Verarbeiten der Buchung: " + error.message 
+    });
   }
 }
 
