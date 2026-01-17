@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
  * PLATZREIFE BUCHUNGSSYSTEM – NEU PROGRAMMIERT
- * Golfclub Metzenhof – Version 3.0 (17.01.2026)
+ * Golfclub Metzenhof – Version 3.1 (17.01.2026) – Erweiterte Datumserkennung
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -39,21 +39,63 @@ const MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "A
 const MONTHS_SHORT = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
 /**
- * Datum parsen (YYYY-MM-DD oder DD.MM.YYYY)
+ * Datum parsen - unterstützt viele Formate:
+ * - YYYY-MM-DD (Standard)
+ * - DD.MM.YYYY (Deutsch)
+ * - YYYY-MM-DDTHH:mm:ss (ISO 8601)
+ * - JavaScript Date Object
+ * - Timestamp (Number)
  */
-function parseDate(str) {
-  if (!str) return null;
+function parseDate(input) {
+  if (!input) return null;
   
-  let y, m, d;
-  if (str.includes("-")) {
-    [y, m, d] = str.split("-").map(Number);
-  } else if (str.includes(".")) {
-    [d, m, y] = str.split(".").map(Number);
-  } else {
+  let dateObj;
+  
+  // Bereits ein Date-Objekt
+  if (input instanceof Date) {
+    dateObj = input;
+  }
+  // Timestamp (Zahl)
+  else if (typeof input === "number") {
+    dateObj = new Date(input);
+  }
+  // String
+  else if (typeof input === "string") {
+    const str = input.trim();
+    
+    // ISO 8601 Format: 2026-02-25T00:00:00.000Z
+    if (str.includes("T")) {
+      dateObj = new Date(str);
+    }
+    // YYYY-MM-DD Format
+    else if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [y, m, d] = str.split("-").map(Number);
+      return { year: y, month: m, day: d };
+    }
+    // DD.MM.YYYY Format
+    else if (str.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+      const [d, m, y] = str.split(".").map(Number);
+      return { year: y, month: m, day: d };
+    }
+    // Versuche als Date zu parsen
+    else {
+      dateObj = new Date(str);
+    }
+  }
+  else {
     return null;
   }
   
-  return { year: y, month: m, day: d };
+  // Aus Date-Objekt extrahieren
+  if (dateObj && !isNaN(dateObj.getTime())) {
+    return {
+      year: dateObj.getFullYear(),
+      month: dateObj.getMonth() + 1,
+      day: dateObj.getDate()
+    };
+  }
+  
+  return null;
 }
 
 /**
@@ -469,19 +511,33 @@ function showSuccess(bookingId, slotId, count, email) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function init() {
-  console.log("🏌️ Platzreife App v3.0 gestartet");
+  console.log("🏌️ Platzreife App v3.1 gestartet");
   
   // 1. Slots laden
   allSlots = await fetchSlots();
-  console.log(`${allSlots.length} Termine geladen`);
+  console.log(`${allSlots.length} Termine von API geladen`);
   
-  // Fallback: Wenn immer noch leer, statische Termine verwenden
-  if (allSlots.length === 0) {
-    allSlots = generateStaticSlots();
-    console.log(`Fallback: ${allSlots.length} statische Termine`);
+  // Debug: Erstes Slot-Objekt anzeigen
+  if (allSlots.length > 0) {
+    console.log("Erster Slot (Debug):", JSON.stringify(allSlots[0]));
   }
   
-  // 2. UI rendern
+  // 2. Prüfen ob zukünftige Termine vorhanden sind
+  const futureCount = allSlots.filter(s => {
+    const dateStr = s.date || s.slot_id || "";
+    return isFuture(dateStr);
+  }).length;
+  
+  console.log(`${futureCount} zukünftige Termine erkannt`);
+  
+  // 3. Fallback: Wenn keine zukünftigen Termine, statische verwenden
+  if (futureCount === 0) {
+    console.warn("⚠️ Keine zukünftigen Termine erkannt! Verwende statische Termine.");
+    allSlots = generateStaticSlots();
+    console.log(`Fallback: ${allSlots.length} statische Termine geladen`);
+  }
+  
+  // 4. UI rendern
   renderTermine();
   renderDropdown();
   renderParticipants(1);
