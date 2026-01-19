@@ -1936,29 +1936,35 @@ a:focus-visible {
 }
 
 /* Count Input mit +/- Buttons */
+.participants-count-section {
+  text-align: center;
+}
+
 .count-input-wrapper {
   display: inline-flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 0.75rem;
+  margin: 1rem auto 0.75rem;
   border: 2px solid var(--color-primary);
   border-radius: 8px;
   overflow: hidden;
+  background: white;
 }
 
 .count-btn {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border: none;
   background: white;
   color: var(--color-primary);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .count-btn.count-minus {
@@ -1977,33 +1983,34 @@ a:focus-visible {
 .count-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: #f0f0f0;
+  background: #f5f5f5;
 }
 
 .count-input-wrapper input[type="number"] {
-  width: 80px;
-  height: 50px;
-  border: none;
-  background: var(--color-primary-faded);
+  width: 70px;
+  height: 56px;
+  border: none !important;
+  background: var(--color-primary-faded) !important;
   text-align: center;
   font-family: var(--font-sans);
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-primary);
   margin: 0;
   padding: 0;
-  -webkit-appearance: none;
-  -moz-appearance: textfield;
-  appearance: none;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+  appearance: none !important;
+  border-radius: 0 !important;
 }
 
-/* Spinner-Pfeile komplett ausblenden */
+/* Spinner-Pfeile komplett ausblenden - alle Browser */
 .count-input-wrapper input[type="number"]::-webkit-outer-spin-button,
 .count-input-wrapper input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
-  display: none;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
 }
 
 .count-input-wrapper input[type="number"]:focus {
@@ -2356,14 +2363,14 @@ a:focus-visible {
   
   /* Teilnehmeranzahl responsive */
   .count-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.25rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
   }
   
   .count-input-wrapper input[type="number"] {
-    width: 50px;
-    height: 44px;
+    width: 56px;
+    height: 48px;
     font-size: 1.25rem;
   }
   
