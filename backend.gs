@@ -1381,40 +1381,82 @@ function recalculateBookedCounts() {
 }
 
 /**
- * Slots für 2026 initialisieren
+ * ══════════════════════════════════════════════════════════════════════════════
+ * ALLE SLOTS LÖSCHEN UND NEU ANLEGEN
  * Diese Funktion manuell im Script-Editor ausführen!
+ * ACHTUNG: Löscht ALLE bestehenden Slots!
+ * ══════════════════════════════════════════════════════════════════════════════
  */
-function seedSlots2026() {
-  const dates = [
-    "2026-02-25", "2026-03-07", "2026-03-14", "2026-03-21", "2026-03-28",
-    "2026-04-04", "2026-04-18", "2026-04-25", "2026-05-01", "2026-05-02",
-    "2026-05-16", "2026-05-30", "2026-06-13", "2026-06-20", "2026-06-27",
-    "2026-07-04", "2026-07-18", "2026-08-01", "2026-08-08", "2026-08-15",
-    "2026-08-22", "2026-08-29", "2026-09-05", "2026-09-19", "2026-10-03",
-    "2026-10-17"
+function resetAndSeedSlots2026() {
+  // Neue Termine mit Kapazitäten (Stand: Januar 2026)
+  const slotsData = [
+    { date: "2026-02-28", capacity: 9 },
+    { date: "2026-03-07", capacity: 9 },
+    { date: "2026-03-14", capacity: 9 },
+    { date: "2026-03-21", capacity: 9 },
+    { date: "2026-03-28", capacity: 9 },
+    { date: "2026-04-04", capacity: 9 },
+    { date: "2026-04-18", capacity: 9 },
+    { date: "2026-04-25", capacity: 9 },
+    { date: "2026-05-01", capacity: 9 },
+    { date: "2026-05-02", capacity: 9 },
+    { date: "2026-05-16", capacity: 9 },
+    { date: "2026-05-30", capacity: 9 },
+    { date: "2026-06-13", capacity: 9 },
+    { date: "2026-06-20", capacity: 9 },
+    { date: "2026-06-27", capacity: 9 },
+    { date: "2026-07-04", capacity: 9 },
+    { date: "2026-07-18", capacity: 9 },
+    { date: "2026-08-01", capacity: 9 },
+    { date: "2026-08-08", capacity: 9 },
+    { date: "2026-08-15", capacity: 9 },
+    { date: "2026-08-22", capacity: 22 },
+    { date: "2026-08-29", capacity: 9 },
+    { date: "2026-09-05", capacity: 9 },
+    { date: "2026-09-19", capacity: 9 },
+    { date: "2026-10-03", capacity: 18 },
+    { date: "2026-10-17", capacity: 18 }
   ];
   
   const sheet = getSheet(SHEET_SLOTS);
+  
+  // ALLE Daten löschen (außer Header falls vorhanden)
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+    console.log(`${lastRow - 1} alte Zeilen gelöscht.`);
+  }
   
   // Header setzen (falls leer)
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(["slot_id", "date", "start", "end", "capacity", "booked", "status"]);
   }
   
-  // Slots einfügen
-  dates.forEach(date => {
+  // Neue Slots einfügen
+  slotsData.forEach(slot => {
     sheet.appendRow([
-      date,        // slot_id = Datum
-      date,        // date
-      "09:00",     // start
-      "15:00",     // end
-      8,           // capacity
-      0,           // booked
-      "OPEN"       // status
+      slot.date,      // slot_id = Datum
+      slot.date,      // date
+      "09:00",        // start
+      "15:00",        // end
+      slot.capacity,  // capacity (variabel!)
+      0,              // booked
+      "OPEN"          // status
     ]);
   });
   
-  console.log(`${dates.length} Slots für 2026 angelegt!`);
+  console.log(`✅ ${slotsData.length} neue Slots für 2026 angelegt!`);
+  console.log("Termine:");
+  slotsData.forEach(s => console.log(`  ${s.date} - Kapazität: ${s.capacity}`));
+}
+
+/**
+ * Alte Funktion (nicht mehr verwenden)
+ * @deprecated Verwende resetAndSeedSlots2026() stattdessen
+ */
+function seedSlots2026() {
+  console.log("⚠️ Diese Funktion ist veraltet! Verwende resetAndSeedSlots2026() stattdessen.");
+  resetAndSeedSlots2026();
 }
 
 /**
