@@ -1937,17 +1937,19 @@ a:focus-visible {
 
 /* Count Input mit +/- Buttons */
 .count-input-wrapper {
-  display: flex;
-  align-items: center;
+  display: inline-flex;
+  align-items: stretch;
   justify-content: center;
-  gap: 0;
   margin-bottom: 0.75rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .count-btn {
   width: 50px;
   height: 50px;
-  border: 2px solid var(--color-primary);
+  border: none;
   background: white;
   color: var(--color-primary);
   font-size: 1.5rem;
@@ -1960,13 +1962,11 @@ a:focus-visible {
 }
 
 .count-btn.count-minus {
-  border-radius: 8px 0 0 8px;
-  border-right: none;
+  border-right: 1px solid var(--color-primary);
 }
 
 .count-btn.count-plus {
-  border-radius: 0 8px 8px 0;
-  border-left: none;
+  border-left: 1px solid var(--color-primary);
 }
 
 .count-btn:hover:not(:disabled) {
@@ -1977,14 +1977,13 @@ a:focus-visible {
 .count-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  background: #f0f0f0;
 }
 
 .count-input-wrapper input[type="number"] {
   width: 80px;
   height: 50px;
-  border: 2px solid var(--color-primary);
-  border-left: none;
-  border-right: none;
+  border: none;
   background: var(--color-primary-faded);
   text-align: center;
   font-family: var(--font-sans);
@@ -1993,16 +1992,18 @@ a:focus-visible {
   color: var(--color-primary);
   margin: 0;
   padding: 0;
-  border-radius: 0;
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
 }
 
+/* Spinner-Pfeile komplett ausblenden */
 .count-input-wrapper input[type="number"]::-webkit-outer-spin-button,
 .count-input-wrapper input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
+  display: none;
 }
 
 .count-input-wrapper input[type="number"]:focus {
@@ -2361,7 +2362,7 @@ a:focus-visible {
   }
   
   .count-input-wrapper input[type="number"] {
-    width: 60px;
+    width: 50px;
     height: 44px;
     font-size: 1.25rem;
   }
