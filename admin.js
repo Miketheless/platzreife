@@ -547,8 +547,6 @@ function renderCombinedTable() {
           <th class="sortable-header col-center" data-column="invoice_sent">Rechnung ${getSortIcon("invoice_sent", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header col-center" data-column="paid_date">Bezahlt ${getSortIcon("paid_date", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header col-center" data-column="appeared">Erschienen ${getSortIcon("appeared", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header col-center" data-column="membership_form">Mitglied ${getSortIcon("membership_form", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header col-center" data-column="dsgvo_form">DSGVO ${getSortIcon("dsgvo_form", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header col-center" data-column="status">Status ${getSortIcon("status", combinedSortColumn, combinedSortDir)}</th>
           <th>Aktion</th>
         </tr>
@@ -574,8 +572,6 @@ function renderCombinedTable() {
               <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent" ${row.invoice_sent ? "checked" : ""} ${disabled} title="Rechnung gesendet"></td>
               <td class="col-center"><input type="date" class="admin-date" data-id="${row.booking_id}" value="${row.paid_date || ""}" ${disabled} title="Bezahldatum"></td>
               <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="appeared" ${row.appeared ? "checked" : ""} ${disabled} title="Teilnehmer erschienen"></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="membership_form" ${row.membership_form ? "checked" : ""} ${disabled} title="Mitgliedschaftsformular erhalten"></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="dsgvo_form" ${row.dsgvo_form ? "checked" : ""} ${disabled} title="DSGVO-Formular erhalten"></td>
               <td class="col-center"><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕" : "✓"}</span></td>
               <td class="col-center">
                 ${cancelled 
