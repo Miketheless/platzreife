@@ -1942,7 +1942,7 @@ a:focus-visible {
 
 .count-input-wrapper {
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   margin: 1rem auto 0.75rem;
   border: 2px solid var(--color-primary);
@@ -1952,7 +1952,7 @@ a:focus-visible {
 }
 
 .count-btn {
-  width: 56px;
+  width: 60px;
   height: 56px;
   border: none;
   background: white;
@@ -1990,7 +1990,7 @@ a:focus-visible {
   width: 70px;
   height: 56px;
   border: none !important;
-  background: var(--color-primary-faded) !important;
+  background: white !important;
   text-align: center;
   font-family: var(--font-sans);
   font-size: 1.5rem;
@@ -1998,19 +1998,26 @@ a:focus-visible {
   color: var(--color-primary);
   margin: 0;
   padding: 0;
-  -webkit-appearance: none !important;
+  -webkit-appearance: textfield !important;
   -moz-appearance: textfield !important;
-  appearance: none !important;
+  appearance: textfield !important;
   border-radius: 0 !important;
+  box-sizing: border-box;
 }
 
 /* Spinner-Pfeile komplett ausblenden - alle Browser */
-.count-input-wrapper input[type="number"]::-webkit-outer-spin-button,
-.count-input-wrapper input[type="number"]::-webkit-inner-spin-button {
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
   appearance: none !important;
   margin: 0 !important;
   display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield !important;
 }
 
 .count-input-wrapper input[type="number"]:focus {
