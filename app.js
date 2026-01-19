@@ -29,19 +29,9 @@ const CONFIG = {
   // Setze hier die n8n Webhook URL ein, um nach Buchung E-Mails zu triggern.
   // Leer lassen = Webhook deaktiviert.
   // ══════════════════════════════════════════════════════════════════════════
-  N8N_WEBHOOK_URL: "",
+  N8N_WEBHOOK_URL: "https://n8n.srv1066806.hstgr.cloud/webhook/platreife/booking",
   N8N_WEBHOOK_TIMEOUT: 8000,  // 8 Sekunden Timeout
   N8N_WEBHOOK_RETRY_DELAY: 2000,  // 2 Sekunden bis Retry
-  
-  // Dokumentenversion für rechtliche Nachvollziehbarkeit
-  DOCUMENTS_VERSION: "v4.3-2026-01-19",
-  
-  // Preise
-  PRICING: {
-    COURSE_GMBH: 99,
-    MEMBERSHIP_VEREIN: 45,
-    TOTAL: 144,
-    CURRENCY: "EUR"
   },
   
   // Dokument-URLs (absolut)
