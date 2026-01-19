@@ -2488,6 +2488,275 @@ a:focus-visible {
   /* Aktuell nicht aktiv – bei Bedarf aktivieren */
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   LANDING PAGE – PAKET-INFO & TERMINAUSWAHL (Optimiert)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Hero Headline */
+.hero-headline {
+  font-family: var(--font-sans);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 600;
+  color: white;
+  margin: 1.5rem 0 0.5rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.hero-subheadline {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  text-align: center;
+}
+
+/* Paket-Info Section */
+.paket-info {
+  background: var(--color-bg-card);
+  padding: 1.5rem 1rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.paket-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .paket-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Leistungsbox */
+.paket-leistungen {
+  flex: 1;
+}
+
+.paket-title {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 0.75rem;
+}
+
+.leistungen-liste {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leistungen-liste li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.check-icon {
+  color: var(--color-primary);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.durchgestrichen {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+/* Preisblock */
+.paket-preis {
+  text-align: center;
+  background: linear-gradient(135deg, var(--color-primary-faded), rgba(74, 140, 123, 0.15));
+  padding: 1.25rem 2rem;
+  border-radius: 12px;
+  border: 2px solid var(--color-primary);
+}
+
+.preis-gross {
+  font-family: var(--font-sans);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.preis-erklaerung {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 0.25rem;
+}
+
+.preis-details {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Verbesserte Termin-Karten */
+.termin-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.termin-card:hover:not([style*="opacity"]) {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(74, 140, 123, 0.15);
+  transform: translateY(-2px);
+}
+
+.termin-card.full {
+  background: #fafafa;
+}
+
+.termin-datum {
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 0.5rem;
+}
+
+.termin-datum .termin-weekday {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.termin-datum .termin-date {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.termin-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.termin-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.info-text {
+  color: var(--color-text);
+}
+
+.info-text.status-open {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.info-text.status-few {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.info-text.status-full {
+  color: var(--color-error);
+}
+
+.termin-verbindlich {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  padding-top: 0.25rem;
+  border-top: 1px dashed var(--color-border-light);
+}
+
+.termin-cta {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  width: 100%;
+}
+
+.termin-cta:hover {
+  background: var(--color-primary-dark);
+}
+
+.termin-cta-disabled {
+  background: #e0e0e0;
+  color: #999;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Booking Hinweis */
+.booking-hinweis {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(74, 140, 123, 0.05);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 8px 8px 0;
+}
+
+.hinweis-text {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  margin: 0 0 0.5rem;
+}
+
+.hinweis-klein {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Termine Grid für neue Karten */
+.termine-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 600px) {
+  .termine-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .termine-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Print Styles */
 @media print {
   .hero-price-badge,

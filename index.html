@@ -19,31 +19,39 @@
       <img src="Gemma Golfn Logo Quer 1C_WEISS.svg" alt="Gemma Golfn" class="hero-logo hero-logo-gemma">
     </div>
     
-    <!-- Eye-Catcher: Großer Titel -->
-    <div class="hero-eyecatcher">
-      <span class="eyecatcher-main">PLATZREIFEKURSE</span>
-      <span class="eyecatcher-year">2026</span>
-    </div>
-    
-    <!-- Preis mit Animation -->
-    <div class="hero-price-badge">
-      <span class="price-amount">€ 99,-</span>
-      <span class="price-info">INKL. MITGLIEDSCHAFT IM JAHR 2026</span>
-    </div>
-    
-    <h1 class="sr-only">Platzreife buchen – Golfclub Metzenhof</h1>
-    
-    <p class="hero-description">
-      Der Platzerlaubnis-Kurs: Dein Einstieg in die Welt des Golfsports! In diesem Kurs lernst du die Grundschläge, die wichtigsten Golfregeln und das richtige Verhalten auf dem Platz. Auch das Spielen auf dem Platz ist ein zentraler Bestandteil des Kurses. Nach erfolgreichem Abschluss bist du berechtigt, unsere wunderschöne 18-Loch-Anlage zu nutzen und kannst an unseren Workshops teilnehmen, um deine persönliche Turnierlizenz zu erwerben. Mach den ersten Schritt – und entdecke deine Leidenschaft für Golf!
-    </p>
-    
-    <p class="hero-subtitle">09:00–15:00 Uhr · max. 8 Teilnehmer pro Termin</p>
-    <p class="hero-motto">Schönes Spiel!</p>
+    <!-- Eye-Catcher: Hauptüberschrift -->
+    <h1 class="hero-headline">Platzreifekurs inkl. Einzelmitgliedschaft 2026</h1>
+    <p class="hero-subheadline">Tageskurs inkl. offizieller Platzreife + vergünstigte Einzelmitgliedschaft</p>
   </div>
 </header>
 
 <!-- ═══════════════════════════════════════════════════════════
-     MAIN CONTENT – NUR TERMINE
+     PAKET-INFO (Above Terminliste)
+     ═══════════════════════════════════════════════════════════ -->
+<section class="paket-info">
+  <div class="paket-content">
+    <!-- Leistungsbox -->
+    <div class="paket-leistungen">
+      <h2 class="paket-title">Im Paket enthalten:</h2>
+      <ul class="leistungen-liste">
+        <li><span class="check-icon">✓</span> Platzreifekurs (09:00–15:00 Uhr)</li>
+        <li><span class="check-icon">✓</span> Trainer & Übungsbälle</li>
+        <li><span class="check-icon">✓</span> Platzreifeprüfung</li>
+        <li><span class="check-icon">✓</span> Einzelmitgliedschaft 2026 <span class="durchgestrichen">(statt 189 €)</span></li>
+      </ul>
+    </div>
+    
+    <!-- Preisblock -->
+    <div class="paket-preis">
+      <div class="preis-gross">144 €</div>
+      <div class="preis-erklaerung">Gesamtpreis</div>
+      <div class="preis-details">(99 € Kurs + 45 € Mitgliedschaft)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT – TERMINE
      ═══════════════════════════════════════════════════════════ -->
 <main class="container">
   
@@ -51,7 +59,7 @@
   <section class="card termine-section">
     <div class="card-header">
       <h2>Verfügbare Termine</h2>
-      <p class="termine-subtitle">Wähle deinen Wunschtermin – klicke auf einen Termin um zu buchen</p>
+      <p class="termine-subtitle">Wähle deinen Wunschtermin für den Platzreifekurs</p>
     </div>
     
     <div id="slots-container" class="termine-grid">
@@ -59,6 +67,14 @@
         <div class="loading-spinner"></div>
         <span>Termine werden geladen...</span>
       </div>
+    </div>
+    
+    <!-- Legal-Hinweis -->
+    <div class="booking-hinweis">
+      <p class="hinweis-text">
+        <strong>Hinweis:</strong> Mit Auswahl eines Termins beginnt der Buchungsvorgang für eine kostenpflichtige Leistung mit fixem Termin.
+      </p>
+      <p class="hinweis-klein">Nach Abschluss der Buchung ist ein Rücktritt gemäß § 18 FAGG ausgeschlossen.</p>
     </div>
   </section>
   

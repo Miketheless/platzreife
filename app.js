@@ -282,7 +282,7 @@ function renderTermineGrid() {
     return;
   }
   
-  // HTML generieren – Klickbare Karten
+  // HTML generieren – Klickbare Karten mit erweiterten Infos
   container.innerHTML = slots.map(slot => {
     const p = parseDate(slot.date);
     if (!p) return "";
@@ -292,17 +292,14 @@ function renderTermineGrid() {
     const isBookable = free > 0;
     
     let statusClass = "open";
-    let statusIcon = "✓";
-    let statusText = `${free} Plätze frei`;
+    let statusText = `${free} von ${slot.capacity} Plätzen frei`;
     
     if (free === 0) {
       statusClass = "full";
-      statusIcon = "✕";
       statusText = "Ausgebucht";
     } else if (free <= 2) {
       statusClass = "few";
-      statusIcon = "!";
-      statusText = `Nur ${free} frei`;
+      statusText = `Nur noch ${free} Plätze frei`;
     }
     
     // Klickbar nur wenn buchbar
@@ -311,15 +308,26 @@ function renderTermineGrid() {
       : 'style="opacity:0.5; cursor:not-allowed;"';
     
     return `
-      <div class="termin-card ${statusClass}" ${clickAttr} title="${isBookable ? 'Klicken zum Buchen' : 'Ausgebucht'}">
-        <div class="termin-weekday">${WEEKDAYS_SHORT[dateObj.getDay()]}</div>
-        <div class="termin-day">${p.day}</div>
-        <div class="termin-month">${MONTHS[p.month - 1]} ${p.year}</div>
-        <div class="termin-status">
-          <span class="termin-status-icon">${statusIcon}</span>
-          ${statusText}
+      <div class="termin-card ${statusClass}" ${clickAttr} title="${isBookable ? 'Termin auswählen' : 'Ausgebucht'}">
+        <div class="termin-datum">
+          <div class="termin-weekday">${WEEKDAYS[dateObj.getDay()]}</div>
+          <div class="termin-date">${String(p.day).padStart(2, "0")}.${String(p.month).padStart(2, "0")}.${p.year}</div>
         </div>
-        ${isBookable ? '<div class="termin-action">Jetzt buchen →</div>' : ''}
+        <div class="termin-details">
+          <div class="termin-info-row">
+            <span class="info-icon">🕐</span>
+            <span class="info-text">${CONFIG.COURSE_START}–${CONFIG.COURSE_END} Uhr</span>
+          </div>
+          <div class="termin-info-row">
+            <span class="info-icon">👥</span>
+            <span class="info-text status-${statusClass}">${statusText}</span>
+          </div>
+          <div class="termin-verbindlich">⚡ verbindlicher Termin</div>
+        </div>
+        ${isBookable 
+          ? '<button type="button" class="termin-cta">Termin auswählen & weiter</button>' 
+          : '<div class="termin-cta-disabled">Nicht verfügbar</div>'
+        }
       </div>
     `;
   }).join("");
