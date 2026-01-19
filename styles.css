@@ -1994,6 +1994,15 @@ a:focus-visible {
   margin: 0;
   padding: 0;
   border-radius: 0;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+.count-input-wrapper input[type="number"]::-webkit-outer-spin-button,
+.count-input-wrapper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .count-input-wrapper input[type="number"]:focus {
@@ -2342,6 +2351,24 @@ a:focus-visible {
   .termin-card {
     min-height: 140px;
     padding: 0.875rem;
+  }
+  
+  /* Teilnehmeranzahl responsive */
+  .count-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+  
+  .count-input-wrapper input[type="number"] {
+    width: 60px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+  
+  .participants-count-section,
+  .participants-data-section {
+    padding: 1.25rem;
   }
   
   .termin-weekday {
