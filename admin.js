@@ -534,22 +534,23 @@ function renderCombinedTable() {
     <table class="admin-table combined-table">
       <thead>
         <tr>
-          <th class="sortable-header vertical-header" data-column="slot_id"><span>Termin</span> ${getSortIcon("slot_id", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="booking_id"><span>Buchung</span> ${getSortIcon("booking_id", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="first_name"><span>Vorname</span> ${getSortIcon("first_name", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="last_name"><span>Nachname</span> ${getSortIcon("last_name", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="street"><span>Adresse</span> ${getSortIcon("street", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="zip"><span>PLZ</span> ${getSortIcon("zip", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="city"><span>Ort</span> ${getSortIcon("city", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="contact_email"><span>E-Mail</span> ${getSortIcon("contact_email", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="contact_phone"><span>Telefon</span> ${getSortIcon("contact_phone", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="voucher_code"><span>Gutschein</span> ${getSortIcon("voucher_code", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="invoice_sent"><span>Rechnung</span> ${getSortIcon("invoice_sent", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="appeared"><span>Erschienen</span> ${getSortIcon("appeared", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="membership_form"><span>Mitgliedschaft</span> ${getSortIcon("membership_form", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="dsgvo_form"><span>DSGVO</span> ${getSortIcon("dsgvo_form", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header vertical-header" data-column="status"><span>Status</span> ${getSortIcon("status", combinedSortColumn, combinedSortDir)}</th>
-          <th class="vertical-header"><span>Aktion</span></th>
+          <th class="sortable-header" data-column="slot_id">Termin ${getSortIcon("slot_id", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="booking_id">Buchung ${getSortIcon("booking_id", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="first_name">Vorname ${getSortIcon("first_name", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="last_name">Nachname ${getSortIcon("last_name", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="street">Adresse ${getSortIcon("street", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="zip">PLZ ${getSortIcon("zip", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="city">Ort ${getSortIcon("city", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="contact_email">E-Mail ${getSortIcon("contact_email", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="contact_phone">Telefon ${getSortIcon("contact_phone", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="voucher_code">Gutschein ${getSortIcon("voucher_code", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="invoice_sent">Rechnung ${getSortIcon("invoice_sent", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="paid_date">Bezahlt ${getSortIcon("paid_date", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="appeared">Erschienen ${getSortIcon("appeared", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="membership_form">Mitglied ${getSortIcon("membership_form", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="dsgvo_form">DSGVO ${getSortIcon("dsgvo_form", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="status">Status ${getSortIcon("status", combinedSortColumn, combinedSortDir)}</th>
+          <th>Aktion</th>
         </tr>
       </thead>
       <tbody>
@@ -570,10 +571,11 @@ function renderCombinedTable() {
               <td><a href="mailto:${row.contact_email}">${row.contact_email || "–"}</a></td>
               <td>${row.contact_phone || "–"}</td>
               <td>${row.voucher_code ? `<span style="background:#e7f5e7;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.7rem;font-weight:600;color:#2e7d32;">${row.voucher_code}</span>` : "–"}</td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent" ${row.invoice_sent ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="appeared" ${row.appeared ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="membership_form" ${row.membership_form ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="dsgvo_form" ${row.dsgvo_form ? "checked" : ""} ${disabled}></td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent" ${row.invoice_sent ? "checked" : ""} ${disabled} title="Rechnung gesendet"></td>
+              <td class="col-center"><input type="date" class="admin-date" data-id="${row.booking_id}" value="${row.paid_date || ""}" ${disabled} title="Bezahldatum"></td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="appeared" ${row.appeared ? "checked" : ""} ${disabled} title="Teilnehmer erschienen"></td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="membership_form" ${row.membership_form ? "checked" : ""} ${disabled} title="Mitgliedschaftsformular erhalten"></td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="dsgvo_form" ${row.dsgvo_form ? "checked" : ""} ${disabled} title="DSGVO-Formular erhalten"></td>
               <td class="col-center"><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕" : "✓"}</span></td>
               <td class="col-center">
                 ${cancelled 
