@@ -24,11 +24,9 @@ let slotsData = [];
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
-// Sortierung
-let bookingsSortColumn = "slot_id";
-let bookingsSortDir = "asc";
-let participantsSortColumn = "slot_id";
-let participantsSortDir = "asc";
+// Sortierung für kombinierte Tabelle
+let combinedSortColumn = "slot_id";
+let combinedSortDir = "asc";
 
 const MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", 
                 "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -52,8 +50,7 @@ const elements = {
   statConfirmed: $("stat-confirmed"),
   statCancelled: $("stat-cancelled"),
   statParticipants: $("stat-participants"),
-  bookingsContainer: $("bookings-container"),
-  participantsContainer: $("participants-container"),
+  combinedContainer: $("combined-container"),
   loadingOverlay: $("loading-overlay"),
   // Kalender
   calendarGrid: $("calendar-grid"),
@@ -465,98 +462,201 @@ function renderStats() {
   elements.statParticipants.textContent = participants;
 }
 
-function renderBookings() {
-  if (bookingsData.length === 0) {
-    elements.bookingsContainer.innerHTML = '<p class="text-muted">Keine Buchungen.</p>';
+/**
+ * Kombinierte Tabelle: Buchungen & Teilnehmer
+ * Jede Zeile = ein Teilnehmer mit allen Buchungs- und Adressdaten
+ */
+function renderCombinedTable() {
+  // Alle Teilnehmer mit Buchungsinfos sammeln
+  const all = [];
+  bookingsData.forEach(b => {
+    const participants = b.participants || [];
+    
+    // Falls keine Teilnehmer, trotzdem Buchung anzeigen
+    if (participants.length === 0) {
+      all.push({
+        booking_id: b.booking_id,
+        slot_id: b.slot_id,
+        contact_email: b.contact_email || "",
+        contact_phone: b.contact_phone || "",
+        status: b.status,
+        invoice_sent: b.invoice_sent,
+        appeared: b.appeared,
+        membership_form: b.membership_form,
+        dsgvo_form: b.dsgvo_form,
+        paid_date: b.paid_date,
+        participant_nr: 0,
+        first_name: "(keine TN)",
+        last_name: "",
+        street: "",
+        house_no: "",
+        zip: "",
+        city: ""
+      });
+    } else {
+      participants.forEach((p, i) => {
+        all.push({
+          booking_id: b.booking_id,
+          slot_id: b.slot_id,
+          contact_email: b.contact_email || "",
+          contact_phone: b.contact_phone || "",
+          status: b.status,
+          invoice_sent: b.invoice_sent,
+          appeared: b.appeared,
+          membership_form: b.membership_form,
+          dsgvo_form: b.dsgvo_form,
+          paid_date: b.paid_date,
+          participant_nr: i + 1,
+          first_name: p.first_name || "",
+          last_name: p.last_name || "",
+          street: p.street || "",
+          house_no: p.house_no || "",
+          zip: p.zip || "",
+          city: p.city || ""
+        });
+      });
+    }
+  });
+  
+  if (all.length === 0) {
+    elements.combinedContainer.innerHTML = '<p class="text-muted">Keine Buchungen vorhanden.</p>';
     return;
   }
   
-  const sorted = sortData(bookingsData, bookingsSortColumn, bookingsSortDir);
+  const sorted = sortData(all, combinedSortColumn, combinedSortDir);
   
-  // Spaltenbreiten in Prozent für bessere Browser-Kompatibilität
+  // Gruppierung für rowspan berechnen
+  const bookingGroups = {};
+  sorted.forEach((row, idx) => {
+    if (!bookingGroups[row.booking_id]) {
+      bookingGroups[row.booking_id] = { startIdx: idx, count: 0 };
+    }
+    bookingGroups[row.booking_id].count++;
+  });
+  
+  let lastBookingId = null;
+  
   const html = `
-    <table class="admin-table">
+    <table class="admin-table combined-table">
       <colgroup>
-        <col style="width: 9%;">  <!-- ID -->
-        <col style="width: 9%;">  <!-- Termin -->
-        <col style="width: 18%;"> <!-- E-Mail -->
-        <col style="width: 10%;"> <!-- Telefon -->
-        <col style="width: 4%;">  <!-- TN -->
-        <col style="width: 6%;">  <!-- Rechn. -->
-        <col style="width: 6%;">  <!-- Ersch. -->
-        <col style="width: 6%;">  <!-- Mitgl. -->
-        <col style="width: 6%;">  <!-- DSGVO -->
-        <col style="width: 11%;"> <!-- Bezahlt -->
-        <col style="width: 8%;">  <!-- Status -->
-        <col style="width: 7%;">  <!-- Aktion -->
+        <col style="width: 7%;">   <!-- Termin -->
+        <col style="width: 7%;">   <!-- Buchungs-ID -->
+        <col style="width: 8%;">   <!-- Name -->
+        <col style="width: 8%;">   <!-- Nachname -->
+        <col style="width: 12%;">  <!-- Adresse -->
+        <col style="width: 5%;">   <!-- PLZ -->
+        <col style="width: 8%;">   <!-- Ort -->
+        <col style="width: 12%;">  <!-- E-Mail -->
+        <col style="width: 7%;">   <!-- Telefon -->
+        <col style="width: 4%;">   <!-- Rechn. -->
+        <col style="width: 4%;">   <!-- Ersch. -->
+        <col style="width: 4%;">   <!-- Mitgl. -->
+        <col style="width: 4%;">   <!-- DSGVO -->
+        <col style="width: 5%;">   <!-- Status -->
+        <col style="width: 5%;">   <!-- Aktion -->
       </colgroup>
       <thead>
         <tr>
-          <th class="sortable-header" data-column="booking_id" data-table="bookings">ID ${getSortIcon("booking_id", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="sortable-header" data-column="slot_id" data-table="bookings">Termin ${getSortIcon("slot_id", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="sortable-header" data-column="contact_email" data-table="bookings">E-Mail ${getSortIcon("contact_email", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="sortable-header" data-column="contact_phone" data-table="bookings">Telefon ${getSortIcon("contact_phone", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="sortable-header col-center" data-column="participants_count" data-table="bookings">TN ${getSortIcon("participants_count", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="no-sort col-center">Rechn.</th>
-          <th class="no-sort col-center">Ersch.</th>
-          <th class="no-sort col-center">Mitgl.</th>
-          <th class="no-sort col-center">DSGVO</th>
-          <th class="sortable-header" data-column="paid_date" data-table="bookings">Bezahlt ${getSortIcon("paid_date", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="sortable-header" data-column="status" data-table="bookings">Status ${getSortIcon("status", bookingsSortColumn, bookingsSortDir)}</th>
-          <th class="no-sort">Aktion</th>
+          <th class="sortable-header" data-column="slot_id">Termin ${getSortIcon("slot_id", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="booking_id">Buchung ${getSortIcon("booking_id", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="first_name">Vorname ${getSortIcon("first_name", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header" data-column="last_name">Nachname ${getSortIcon("last_name", combinedSortColumn, combinedSortDir)}</th>
+          <th class="no-sort">Adresse</th>
+          <th class="no-sort col-center">PLZ</th>
+          <th class="no-sort">Ort</th>
+          <th class="sortable-header" data-column="contact_email">E-Mail ${getSortIcon("contact_email", combinedSortColumn, combinedSortDir)}</th>
+          <th class="no-sort">Telefon</th>
+          <th class="no-sort col-center" title="Rechnung gesendet">R</th>
+          <th class="no-sort col-center" title="Erschienen">E</th>
+          <th class="no-sort col-center" title="Mitgliedschaft">M</th>
+          <th class="no-sort col-center" title="DSGVO">D</th>
+          <th class="no-sort col-center">Status</th>
+          <th class="no-sort col-center">Aktion</th>
         </tr>
       </thead>
       <tbody>
-        ${sorted.map(b => {
-          const cancelled = b.status === "CANCELLED";
+        ${sorted.map((row, idx) => {
+          const cancelled = row.status === "CANCELLED";
           const disabled = cancelled ? "disabled" : "";
+          const isFirstInGroup = row.booking_id !== lastBookingId;
+          const groupInfo = bookingGroups[row.booking_id];
+          
           let paidVal = "";
-          if (b.paid_date) {
-            try { paidVal = new Date(b.paid_date).toISOString().split("T")[0]; } catch(e) {}
+          if (row.paid_date) {
+            try { paidVal = new Date(row.paid_date).toISOString().split("T")[0]; } catch(e) {}
           }
           
-          return `
-            <tr class="${cancelled ? "row-cancelled" : ""}">
-              <td><strong>${b.booking_id || "–"}</strong></td>
-              <td>${formatDate(b.slot_id)}</td>
-              <td><a href="mailto:${b.contact_email}">${b.contact_email || "–"}</a></td>
-              <td>${b.contact_phone || "–"}</td>
-              <td class="col-center">${b.participants_count || 0}</td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${b.booking_id}" data-field="invoice_sent" ${b.invoice_sent ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${b.booking_id}" data-field="appeared" ${b.appeared ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${b.booking_id}" data-field="membership_form" ${b.membership_form ? "checked" : ""} ${disabled}></td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${b.booking_id}" data-field="dsgvo_form" ${b.dsgvo_form ? "checked" : ""} ${disabled}></td>
-              <td><input type="date" class="admin-date" data-id="${b.booking_id}" data-field="paid_date" value="${paidVal}" ${disabled}></td>
-              <td><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕ Storno" : "✓ OK"}</span></td>
-              <td>
+          const addressStr = row.street ? `${row.street} ${row.house_no || ""}`.trim() : "–";
+          
+          let html = `<tr class="${cancelled ? "row-cancelled" : ""} ${isFirstInGroup ? "group-start" : ""}">`;
+          
+          // Nur bei erster Zeile der Buchung: Termin, Buchungs-ID, E-Mail, Telefon, Checkboxen, Status, Aktion
+          if (isFirstInGroup) {
+            const rowspan = groupInfo.count > 1 ? `rowspan="${groupInfo.count}"` : "";
+            html += `
+              <td ${rowspan}>${formatDate(row.slot_id)}</td>
+              <td ${rowspan}><strong>${row.booking_id}</strong></td>
+            `;
+          }
+          
+          // Teilnehmer-Daten (immer)
+          html += `
+            <td class="name-cell"><strong>${row.first_name}</strong></td>
+            <td class="name-cell"><strong>${row.last_name}</strong></td>
+            <td>${addressStr}</td>
+            <td class="col-center">${row.zip || "–"}</td>
+            <td>${row.city || "–"}</td>
+          `;
+          
+          // Nur bei erster Zeile: restliche Buchungsdaten
+          if (isFirstInGroup) {
+            const rowspan = groupInfo.count > 1 ? `rowspan="${groupInfo.count}"` : "";
+            html += `
+              <td ${rowspan}><a href="mailto:${row.contact_email}">${row.contact_email || "–"}</a></td>
+              <td ${rowspan}>${row.contact_phone || "–"}</td>
+              <td ${rowspan} class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent" ${row.invoice_sent ? "checked" : ""} ${disabled}></td>
+              <td ${rowspan} class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="appeared" ${row.appeared ? "checked" : ""} ${disabled}></td>
+              <td ${rowspan} class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="membership_form" ${row.membership_form ? "checked" : ""} ${disabled}></td>
+              <td ${rowspan} class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="dsgvo_form" ${row.dsgvo_form ? "checked" : ""} ${disabled}></td>
+              <td ${rowspan} class="col-center"><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕" : "✓"}</span></td>
+              <td ${rowspan} class="col-center">
                 ${cancelled 
-                  ? `<button type="button" class="btn-restore" data-id="${b.booking_id}">↩</button>` 
-                  : `<button type="button" class="btn-cancel" data-id="${b.booking_id}">✕</button>`
+                  ? `<button type="button" class="btn-restore" data-id="${row.booking_id}" title="Wiederherstellen">↩</button>` 
+                  : `<button type="button" class="btn-cancel" data-id="${row.booking_id}" title="Stornieren">✕</button>`
                 }
               </td>
-            </tr>
-          `;
+            `;
+          }
+          
+          html += `</tr>`;
+          lastBookingId = row.booking_id;
+          return html;
         }).join("")}
       </tbody>
     </table>
+    <p style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">
+      Buchungen: <strong>${bookingsData.length}</strong> · 
+      Teilnehmer: <strong>${all.filter(p => p.participant_nr > 0).length}</strong> · 
+      Bestätigt: <strong>${all.filter(p => p.status === "CONFIRMED" && p.participant_nr > 0).length}</strong>
+    </p>
   `;
   
-  elements.bookingsContainer.innerHTML = html;
-  attachBookingListeners();
+  elements.combinedContainer.innerHTML = html;
+  attachCombinedListeners();
 }
 
-function attachBookingListeners() {
+function attachCombinedListeners() {
   // Sort
-  document.querySelectorAll('.sortable-header[data-table="bookings"]').forEach(th => {
+  document.querySelectorAll('.admin-table.combined-table .sortable-header').forEach(th => {
     th.addEventListener("click", () => {
       const col = th.dataset.column;
-      if (bookingsSortColumn === col) {
-        bookingsSortDir = bookingsSortDir === "asc" ? "desc" : "asc";
+      if (combinedSortColumn === col) {
+        combinedSortDir = combinedSortDir === "asc" ? "desc" : "asc";
       } else {
-        bookingsSortColumn = col;
-        bookingsSortDir = "asc";
+        combinedSortColumn = col;
+        combinedSortDir = "asc";
       }
-      renderBookings();
+      renderCombinedTable();
     });
   });
   
@@ -585,103 +685,6 @@ function attachBookingListeners() {
   });
   document.querySelectorAll(".btn-restore").forEach(btn => {
     btn.addEventListener("click", () => restoreBooking(btn.dataset.id));
-  });
-}
-
-function renderParticipants() {
-  const all = [];
-  bookingsData.forEach(b => {
-    (b.participants || []).forEach((p, i) => {
-      all.push({
-        booking_id: b.booking_id,
-        booking_status: b.status,
-        slot_id: b.slot_id,
-        participant_nr: i + 1,
-        first_name: p.first_name || "",
-        last_name: p.last_name || "",
-        street: p.street || "",
-        house_no: p.house_no || "",
-        zip: p.zip || "",
-        city: p.city || ""
-      });
-    });
-  });
-  
-  if (all.length === 0) {
-    elements.participantsContainer.innerHTML = '<p class="text-muted">Keine Teilnehmer.</p>';
-    return;
-  }
-  
-  const sorted = sortData(all, participantsSortColumn, participantsSortDir);
-  
-  // Spaltenbreiten in Prozent für bessere Browser-Kompatibilität
-  const html = `
-    <table class="admin-table">
-      <colgroup>
-        <col style="width: 11%;"> <!-- Buchung -->
-        <col style="width: 10%;"> <!-- Termin -->
-        <col style="width: 5%;">  <!-- Nr. -->
-        <col style="width: 12%;"> <!-- Vorname -->
-        <col style="width: 12%;"> <!-- Nachname -->
-        <col style="width: 18%;"> <!-- Straße -->
-        <col style="width: 5%;">  <!-- Nr. -->
-        <col style="width: 7%;">  <!-- PLZ -->
-        <col style="width: 14%;"> <!-- Ort -->
-        <col style="width: 6%;">  <!-- Status -->
-      </colgroup>
-      <thead>
-        <tr>
-          <th class="sortable-header" data-column="booking_id" data-table="participants">Buchung ${getSortIcon("booking_id", participantsSortColumn, participantsSortDir)}</th>
-          <th class="sortable-header" data-column="slot_id" data-table="participants">Termin ${getSortIcon("slot_id", participantsSortColumn, participantsSortDir)}</th>
-          <th class="sortable-header col-center" data-column="participant_nr" data-table="participants">Nr. ${getSortIcon("participant_nr", participantsSortColumn, participantsSortDir)}</th>
-          <th class="sortable-header" data-column="first_name" data-table="participants">Vorname ${getSortIcon("first_name", participantsSortColumn, participantsSortDir)}</th>
-          <th class="sortable-header" data-column="last_name" data-table="participants">Nachname ${getSortIcon("last_name", participantsSortColumn, participantsSortDir)}</th>
-          <th class="no-sort">Straße</th>
-          <th class="no-sort col-center">Nr.</th>
-          <th class="no-sort col-center">PLZ</th>
-          <th class="no-sort">Ort</th>
-          <th class="no-sort col-center">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${sorted.map(p => {
-          const cancelled = p.booking_status === "CANCELLED";
-          return `
-            <tr class="${cancelled ? "row-cancelled" : ""}">
-              <td>${p.booking_id}</td>
-              <td>${formatDate(p.slot_id)}</td>
-              <td class="col-center">${p.participant_nr}</td>
-              <td class="name-cell"><strong>${p.first_name}</strong></td>
-              <td class="name-cell"><strong>${p.last_name}</strong></td>
-              <td>${p.street || "–"}</td>
-              <td class="col-center">${p.house_no || "–"}</td>
-              <td class="col-center">${p.zip || "–"}</td>
-              <td>${p.city || "–"}</td>
-              <td class="col-center"><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕" : "✓"}</span></td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-    <p style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">
-      Gesamt: <strong>${all.length}</strong> (${all.filter(p => p.booking_status === "CONFIRMED").length} bestätigt)
-    </p>
-  `;
-  
-  elements.participantsContainer.innerHTML = html;
-  
-  // Sort
-  document.querySelectorAll('.sortable-header[data-table="participants"]').forEach(th => {
-    th.addEventListener("click", () => {
-      const col = th.dataset.column;
-      if (participantsSortColumn === col) {
-        participantsSortDir = participantsSortDir === "asc" ? "desc" : "asc";
-      } else {
-        participantsSortColumn = col;
-        participantsSortDir = "asc";
-      }
-      renderParticipants();
-    });
   });
 }
 
@@ -744,8 +747,7 @@ async function handleLogin() {
       
       renderStats();
       renderCalendar();
-      renderBookings();
-      renderParticipants();
+      renderCombinedTable();
     } else {
       elements.loginMessage.textContent = bookingsRes.message || "Ungültiger Schlüssel";
       elements.loginBtn.disabled = false;
@@ -776,8 +778,7 @@ async function handleRefresh() {
       
       renderStats();
       renderCalendar();
-      renderBookings();
-      renderParticipants();
+      renderCombinedTable();
     }
   } catch (e) {
     console.error(e);

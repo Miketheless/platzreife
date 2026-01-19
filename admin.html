@@ -89,6 +89,21 @@
       text-decoration: line-through;
     }
     
+    /* Kombinierte Tabelle: Gruppierung */
+    .admin-table.combined-table tbody tr.group-start {
+      border-top: 2px solid var(--color-primary);
+    }
+    
+    .admin-table.combined-table tbody tr.group-start td:first-child,
+    .admin-table.combined-table tbody tr.group-start td:nth-child(2) {
+      background: rgba(74, 140, 123, 0.08);
+    }
+    
+    .admin-table.combined-table td[rowspan] {
+      vertical-align: top;
+      background: rgba(74, 140, 123, 0.04);
+    }
+    
     /* Inputs */
     .admin-checkbox {
       width: 16px;
@@ -670,8 +685,7 @@
     <!-- Tabs -->
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="calendar">📅 Kalender</button>
-      <button class="admin-tab" data-tab="bookings">📋 Buchungen</button>
-      <button class="admin-tab" data-tab="participants">👥 Teilnehmer</button>
+      <button class="admin-tab" data-tab="combined">📋 Buchungen & Teilnehmer</button>
     </div>
     
     <!-- Tab: Kalender -->
@@ -695,24 +709,14 @@
       </div>
     </div>
     
-    <!-- Tab: Buchungen -->
-    <div id="tab-bookings" class="tab-content">
+    <!-- Tab: Buchungen & Teilnehmer (kombiniert) -->
+    <div id="tab-combined" class="tab-content">
       <div class="card" style="padding: 1rem;">
-        <h3 style="margin: 0 0 0.5rem 0;">📋 Alle Buchungen</h3>
+        <h3 style="margin: 0 0 0.5rem 0;">📋 Alle Buchungen & Teilnehmer</h3>
         <p class="text-muted" style="font-size: 0.75rem; margin-bottom: 0.5rem;">
-          Klicke auf Spalten zum Sortieren. Änderungen werden sofort gespeichert.
+          Jede Zeile = ein Teilnehmer. Klicke auf Spalten zum Sortieren. Änderungen werden sofort gespeichert.
         </p>
-        <div id="bookings-container" class="admin-table-wrapper">
-          <p class="text-muted">Daten werden geladen...</p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Tab: Teilnehmer -->
-    <div id="tab-participants" class="tab-content">
-      <div class="card" style="padding: 1rem;">
-        <h3 style="margin: 0 0 0.5rem 0;">👥 Alle Teilnehmer</h3>
-        <div id="participants-container" class="admin-table-wrapper">
+        <div id="combined-container" class="admin-table-wrapper">
           <p class="text-muted">Daten werden geladen...</p>
         </div>
       </div>
@@ -730,3 +734,5 @@
 <script src="admin.js"></script>
 </body>
 </html>
+
+
