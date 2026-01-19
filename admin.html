@@ -22,11 +22,9 @@
     
     .admin-table {
       width: 100%;
-      min-width: 900px;
       border-collapse: collapse;
       border-spacing: 0;
       font-size: 0.8rem;
-      table-layout: fixed;
     }
     
     .admin-table th,
@@ -36,9 +34,6 @@
       border-bottom: 1px solid #e0e0e0;
       vertical-align: middle;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      box-sizing: border-box;
     }
     
     .admin-table th {
@@ -50,9 +45,6 @@
       user-select: none;
       -moz-user-select: none;
       -webkit-user-select: none;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
     
     .admin-table th:hover {
@@ -91,13 +83,19 @@
     
     /* Kombinierte Tabelle */
     .admin-table.combined-table {
-      min-width: 1200px;
+      min-width: 1400px;
     }
     
     .admin-table.combined-table th,
     .admin-table.combined-table td {
-      padding: 0.4rem 0.3rem;
-      font-size: 0.75rem;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .admin-table.combined-table td {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     /* Inputs */
