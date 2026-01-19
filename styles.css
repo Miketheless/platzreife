@@ -1132,6 +1132,86 @@ button:disabled {
   color: var(--color-primary);
 }
 
+/* Webhook Status (n8n E-Mail) */
+.webhook-status {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  text-align: center;
+  margin: 1rem auto;
+  max-width: 500px;
+}
+
+.webhook-status.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.webhook-status.warning {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+/* Nächste Schritte */
+.next-steps {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f0f7f0;
+  border-radius: 8px;
+  border-left: 4px solid var(--color-primary);
+  text-align: left;
+}
+
+.next-steps h3 {
+  font-size: 1rem;
+  color: var(--color-primary);
+  margin: 0 0 1rem 0;
+}
+
+.next-steps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.next-steps li {
+  padding: 0.4rem 0;
+  color: var(--color-text);
+  font-size: 0.9375rem;
+}
+
+.next-steps-docs {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.next-steps-docs a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.next-steps-docs a:hover {
+  text-decoration: underline;
+}
+
+.success-contact {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.success-contact p {
+  margin: 0.25rem 0;
+  color: var(--color-text-light);
+  font-size: 0.9375rem;
+}
+
+.success-contact strong {
+  color: var(--color-primary);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
    CANCEL PAGE
    ══════════════════════════════════════════════════════════════════════════════ */

@@ -1,11 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * PLATZREIFE BUCHUNGSSYSTEM – VERSION 4.2
- * Golfclub Metzenhof – 17.01.2026 – Verbesserte Buchungsseite
+ * PLATZREIFE BUCHUNGSSYSTEM – VERSION 4.3
+ * Golfclub Metzenhof – 19.01.2026 – n8n Webhook Integration
  * 
  * Zwei-Seiten-System:
  * - index.html: Terminübersicht (klickbar → weiter zu buchen.html)
  * - buchen.html: Buchungsformular mit vorausgewähltem Termin
+ * 
+ * n8n Webhook Integration:
+ * - Nach erfolgreicher Buchung wird ein Webhook an n8n gesendet
+ * - n8n kann dann Outlook E-Mails versenden
+ * - Setze N8N_WEBHOOK_URL in CONFIG um den Webhook zu aktivieren
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -18,6 +23,34 @@ const CONFIG = {
   MAX_PARTICIPANTS: 8,
   COURSE_START: "09:00",
   COURSE_END: "15:00",
+  
+  // ══════════════════════════════════════════════════════════════════════════
+  // n8n WEBHOOK KONFIGURATION
+  // Setze hier die n8n Webhook URL ein, um nach Buchung E-Mails zu triggern.
+  // Leer lassen = Webhook deaktiviert.
+  // ══════════════════════════════════════════════════════════════════════════
+  N8N_WEBHOOK_URL: "",
+  N8N_WEBHOOK_TIMEOUT: 8000,  // 8 Sekunden Timeout
+  N8N_WEBHOOK_RETRY_DELAY: 2000,  // 2 Sekunden bis Retry
+  
+  // Dokumentenversion für rechtliche Nachvollziehbarkeit
+  DOCUMENTS_VERSION: "v4.3-2026-01-19",
+  
+  // Preise
+  PRICING: {
+    COURSE_GMBH: 99,
+    MEMBERSHIP_VEREIN: 45,
+    TOTAL: 144,
+    CURRENCY: "EUR"
+  },
+  
+  // Dokument-URLs (absolut)
+  DOCUMENTS: {
+    AGB_URL: "https://miketheless.github.io/platzreife/agb.html",
+    PRIVACY_URL: "https://miketheless.github.io/platzreife/privacy.html",
+    STATUTES_URL: "https://miketheless.github.io/platzreife/2009_statuten_metzenhof-1.pdf",
+    MEMBERSHIP_TERMS_URL: "https://miketheless.github.io/platzreife/AGB%20Verein%20Golfpark%20Metzenhof.pdf"
+  },
   
   // Feste Termine 2026 (Fallback)
   DATES_2026: [
@@ -470,12 +503,16 @@ function displaySelectedSlot() {
     `;
   }
   
-  // Freie Plätze mit Icon
+  // Freie Plätze mit Icon (oder "Max. 8" wenn keine Daten)
   if (infoFree) {
-    if (free <= 2) {
+    if (isNaN(free) || free === null || free === undefined) {
+      infoFree.textContent = "Max. 8 Teilnehmer";
+    } else if (free <= 2 && free > 0) {
       infoFree.innerHTML = `<span class="free-warning">⚠️ Nur noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei!</span>`;
-    } else {
+    } else if (free > 0) {
       infoFree.textContent = `✓ ${free} Plätze frei`;
+    } else {
+      infoFree.textContent = "Max. 8 Teilnehmer";
     }
   }
   
@@ -697,6 +734,154 @@ function updateOrderSummary(count) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// n8n WEBHOOK INTEGRATION
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Strukturiertes Booking-Payload für n8n erstellen
+ * Enthält alle Infos für Outlook E-Mail-Versand
+ */
+function buildBookingPayload(bookingId, slotId, participants, email, phone, termsAccepted) {
+  const count = participants.length;
+  const contactPerson = participants[0] || {};
+  const otherParticipants = participants.slice(1).map(p => ({
+    first_name: p.first_name,
+    last_name: p.last_name,
+    birthdate: p.birthdate || null
+  }));
+  
+  return {
+    // Buchungsidentifikation
+    booking_id: bookingId || `TMP-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+    created_at: new Date().toISOString(),
+    
+    // Termin-Informationen
+    slot: {
+      slot_id: slotId,
+      date_iso: slotId, // YYYY-MM-DD
+      date_display: formatDateShort(slotId),
+      date_long: formatDateLong(slotId),
+      time_range: `${CONFIG.COURSE_START}–${CONFIG.COURSE_END}`
+    },
+    
+    // Teilnehmer
+    participants: {
+      count: count,
+      contact_person: {
+        first_name: contactPerson.first_name || "",
+        last_name: contactPerson.last_name || "",
+        email: email,
+        phone: phone,
+        address: {
+          street: contactPerson.street || "",
+          house_no: contactPerson.house_no || "",
+          zip: contactPerson.zip || "",
+          city: contactPerson.city || "",
+          country: contactPerson.country || "AT"
+        },
+        birthdate: contactPerson.birthdate || null
+      },
+      others: otherParticipants
+    },
+    
+    // Preise
+    pricing: {
+      total: CONFIG.PRICING.TOTAL * count,
+      per_person: CONFIG.PRICING.TOTAL,
+      currency: CONFIG.PRICING.CURRENCY,
+      breakdown: {
+        course_gmbh: CONFIG.PRICING.COURSE_GMBH * count,
+        membership_verein: CONFIG.PRICING.MEMBERSHIP_VEREIN * count
+      }
+    },
+    
+    // Rechtliche Zustimmungen
+    legal_acceptance: {
+      agb_kurs: termsAccepted.agb_kurs,
+      privacy_accepted: termsAccepted.privacy_accepted,
+      membership_statutes: termsAccepted.membership_statutes,
+      partner_awareness: termsAccepted.partner_awareness,
+      cancellation_notice: termsAccepted.cancellation_notice,
+      fagg_consent: termsAccepted.fagg_consent,
+      third_party_consent: termsAccepted.third_party_consent,
+      newsletter: termsAccepted.newsletter,
+      accepted_at: termsAccepted.accepted_at,
+      documents: {
+        agb_url: CONFIG.DOCUMENTS.AGB_URL,
+        privacy_url: CONFIG.DOCUMENTS.PRIVACY_URL,
+        statutes_url: CONFIG.DOCUMENTS.STATUTES_URL,
+        membership_terms_url: CONFIG.DOCUMENTS.MEMBERSHIP_TERMS_URL,
+        documents_version: CONFIG.DOCUMENTS_VERSION
+      },
+      evidence: {
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+    }
+  };
+}
+
+/**
+ * n8n Webhook triggern (mit Retry)
+ * Gibt zurück: { success: true/false, message: string }
+ */
+async function triggerN8nWebhook(payload) {
+  // Webhook deaktiviert?
+  if (!CONFIG.N8N_WEBHOOK_URL) {
+    console.log("n8n Webhook deaktiviert (keine URL konfiguriert)");
+    return { success: true, message: "webhook_disabled" };
+  }
+  
+  console.log("Triggere n8n Webhook:", CONFIG.N8N_WEBHOOK_URL);
+  console.log("Payload:", JSON.stringify(payload, null, 2));
+  
+  const attemptWebhook = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.N8N_WEBHOOK_TIMEOUT);
+    
+    try {
+      const response = await fetch(CONFIG.N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        console.log("n8n Webhook erfolgreich (Status:", response.status, ")");
+        return { success: true, message: "webhook_success" };
+      } else {
+        console.warn("n8n Webhook fehlgeschlagen (Status:", response.status, ")");
+        return { success: false, message: `webhook_error_${response.status}` };
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError") {
+        console.warn("n8n Webhook Timeout");
+        return { success: false, message: "webhook_timeout" };
+      }
+      console.warn("n8n Webhook Fehler:", error.message);
+      return { success: false, message: "webhook_network_error" };
+    }
+  };
+  
+  // Erster Versuch
+  let result = await attemptWebhook();
+  
+  // Retry bei Fehlschlag
+  if (!result.success) {
+    console.log(`n8n Webhook Retry in ${CONFIG.N8N_WEBHOOK_RETRY_DELAY}ms...`);
+    await new Promise(resolve => setTimeout(resolve, CONFIG.N8N_WEBHOOK_RETRY_DELAY));
+    result = await attemptWebhook();
+  }
+  
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // BUCHUNG ABSENDEN
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -856,7 +1041,21 @@ async function handleSubmit(e) {
       console.log("Server-Antwort:", result);
       
       if (result.success || result.ok) {
-        showSuccess(result.booking_id, slotId, count, email, result.email_sent);
+        // Buchung erfolgreich - jetzt n8n Webhook triggern
+        const bookingPayload = buildBookingPayload(
+          result.booking_id,
+          slotId,
+          participants,
+          email,
+          phone,
+          termsAccepted
+        );
+        
+        // Webhook async triggern (Buchung ist bereits gespeichert)
+        const webhookResult = await triggerN8nWebhook(bookingPayload);
+        
+        // Erfolgsanzeige mit Webhook-Status
+        showSuccess(result.booking_id, slotId, count, email, result.email_sent, webhookResult);
       } else {
         throw new Error(result.error || result.message || "Buchung fehlgeschlagen.");
       }
@@ -880,9 +1079,9 @@ async function handleSubmit(e) {
 }
 
 /**
- * Erfolgsanzeige
+ * Erfolgsanzeige mit Webhook-Status
  */
-function showSuccess(bookingId, slotId, count, email, emailSent) {
+function showSuccess(bookingId, slotId, count, email, emailSent, webhookResult = null) {
   const formSection = document.querySelector(".booking-form-section");
   const successSection = document.getElementById("success-section");
   
@@ -896,6 +1095,8 @@ function showSuccess(bookingId, slotId, count, email, emailSent) {
     const countEl = document.getElementById("success-count");
     const emailEl = document.getElementById("success-email");
     const emailStatusEl = document.getElementById("email-status-text");
+    const nextStepsEl = document.getElementById("next-steps");
+    const webhookStatusEl = document.getElementById("webhook-status");
     
     if (idEl) idEl.textContent = bookingId || "–";
     if (dateEl) dateEl.textContent = formatDateLong(slotId);
@@ -910,6 +1111,27 @@ function showSuccess(bookingId, slotId, count, email, emailSent) {
         emailStatusEl.textContent = "Ihre Buchung wurde erfolgreich registriert.";
       }
     }
+    
+    // Webhook-Status anzeigen (für E-Mail via n8n/Outlook)
+    if (webhookStatusEl && webhookResult) {
+      if (webhookResult.message === "webhook_disabled") {
+        // Webhook nicht konfiguriert - kein Hinweis nötig
+        webhookStatusEl.style.display = "none";
+      } else if (webhookResult.success) {
+        webhookStatusEl.textContent = "Bestätigung wird per E-Mail versendet.";
+        webhookStatusEl.className = "webhook-status success";
+        webhookStatusEl.style.display = "block";
+      } else {
+        webhookStatusEl.textContent = "E-Mail-Bestätigung konnte gerade nicht automatisch ausgelöst werden. Bei Fragen kontaktieren Sie uns bitte.";
+        webhookStatusEl.className = "webhook-status warning";
+        webhookStatusEl.style.display = "block";
+      }
+    }
+    
+    // "Nächste Schritte" einblenden
+    if (nextStepsEl) {
+      nextStepsEl.style.display = "block";
+    }
   }
   
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -920,7 +1142,7 @@ function showSuccess(bookingId, slotId, count, email, emailSent) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function init() {
-  console.log("🏌️ Platzreife App v4.2 gestartet");
+  console.log("🏌️ Platzreife App v4.3 gestartet (n8n Webhook)");
   
   // Slots laden
   allSlots = await fetchSlots();

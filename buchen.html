@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Platzreife Buchungsformular – Golfclub Metzenhof – v4.2 (17.01.2026) -->
+<!-- Platzreife Buchungsformular – Golfclub Metzenhof – v4.3 (19.01.2026) – n8n Webhook Integration -->
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -55,7 +55,7 @@
           <span class="time-label">Kurszeit:</span>
           <span class="time-value">09:00 Uhr bis 15:00 Uhr</span>
         </div>
-        <div class="slot-info-free" id="slot-info-free">– Plätze frei</div>
+        <div class="slot-info-free" id="slot-info-free">Max. 8 Teilnehmer</div>
         <a href="index.html" class="slot-change-link">← Anderen Termin wählen</a>
       </div>
       
@@ -218,8 +218,32 @@
       </div>
     </div>
     
+    <!-- Webhook/E-Mail Status -->
+    <p id="webhook-status" class="webhook-status" style="display:none;"></p>
+    
     <div class="success-info">
       <p id="email-status-text">Ihre Buchung wurde erfolgreich registriert.</p>
+    </div>
+    
+    <!-- Nächste Schritte -->
+    <div id="next-steps" class="next-steps" style="display:none;">
+      <h3>Nächste Schritte</h3>
+      <ul>
+        <li>✓ Ihr Termin ist fix reserviert</li>
+        <li>✓ Sie erhalten eine Bestätigung per E-Mail</li>
+        <li>✓ Bitte erscheinen Sie pünktlich um 09:00 Uhr</li>
+      </ul>
+      <p class="next-steps-docs">
+        <small>
+          Ihre Unterlagen: 
+          <a href="agb.html" target="_blank">AGB Kurs</a> · 
+          <a href="privacy.html" target="_blank">Datenschutz</a> · 
+          <a href="2009_statuten_metzenhof-1.pdf" target="_blank">Statuten</a>
+        </small>
+      </p>
+    </div>
+    
+    <div class="success-contact">
       <p>Bei Fragen erreichen Sie uns unter:</p>
       <p><strong>info@metzenhof.at</strong> · <strong>+43 7225 7389</strong></p>
     </div>
