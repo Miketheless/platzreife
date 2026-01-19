@@ -2610,7 +2610,7 @@ a:focus-visible {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -2657,6 +2657,7 @@ a:focus-visible {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .info-icon {
@@ -2745,16 +2746,21 @@ a:focus-visible {
   gap: 1rem;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 550px) {
   .termine-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1000px) {
   .termine-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Termin-Karten Mindestbreite */
+.termin-card {
+  min-width: 280px;
 }
 
 /* Print Styles */
