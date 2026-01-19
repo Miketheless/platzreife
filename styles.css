@@ -2934,10 +2934,18 @@ a:focus-visible {
 }
 
 .legal-checkboxes .checkbox-item {
-  margin-bottom: 0.75rem;
-  padding: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   border-radius: 6px;
   transition: background 0.2s;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.legal-checkboxes .checkbox-item:last-of-type {
+  border-bottom: none;
 }
 
 .legal-checkboxes .checkbox-item:hover {
@@ -2945,8 +2953,9 @@ a:focus-visible {
 }
 
 .legal-checkboxes .checkbox-item span {
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  flex: 1;
 }
 
 .checkbox-optional {
