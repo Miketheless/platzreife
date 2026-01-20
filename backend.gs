@@ -1187,7 +1187,7 @@ Kostenfreie Stornierung bis 7 Tage vor Kursbeginn möglich.
 ═══════════════════════════════════════
 
 Bei Fragen erreichen Sie uns unter:
-E-Mail: info@metzenhof.at
+E-Mail: golf@metzenhof.at
 Telefon: +43 7225 7389
 
 Wir freuen uns auf Sie!
@@ -1210,7 +1210,7 @@ www.metzenhof.at
  * Admin-Benachrichtigung bei neuer Buchung
  */
 function sendAdminNotificationEmail(bookingId, payload, slotData) {
-  const adminEmail = getSetting("ADMIN_EMAIL") || "info@metzenhof.at";
+  const adminEmail = getSetting("ADMIN_EMAIL") || "golf@metzenhof.at";
   
   const participantsList = payload.participants.map((p, i) => 
     `${i + 1}. ${p.first_name} ${p.last_name}, ${p.street} ${p.house_no}, ${p.zip} ${p.city}`
@@ -1250,7 +1250,7 @@ Buchungs-ID: ${bookingData.booking_id}
 Storniert am: ${new Date().toLocaleString("de-AT")}
 
 Bei Fragen erreichen Sie uns unter:
-E-Mail: info@metzenhof.at
+E-Mail: golf@metzenhof.at
 Telefon: +43 7225 7389
 
 Ihr Team vom Golfclub Metzenhof
@@ -1265,7 +1265,7 @@ Ihr Team vom Golfclub Metzenhof
  * Admin-Benachrichtigung bei Stornierung
  */
 function sendAdminCancellationEmail(bookingData) {
-  const adminEmail = getSetting("ADMIN_EMAIL") || "info@metzenhof.at";
+  const adminEmail = getSetting("ADMIN_EMAIL") || "golf@metzenhof.at";
   
   const subject = `[Stornierung] ${bookingData.booking_id}`;
   
@@ -1659,7 +1659,7 @@ function initSettings() {
   
   // Default Settings
   const settings = [
-    ["ADMIN_EMAIL", "info@metzenhof.at"],
+    ["ADMIN_EMAIL", "golf@metzenhof.at"],
     ["MAIL_FROM_NAME", "gemma golfn"],
     ["ADMIN_KEY", "CHANGE_THIS_SECRET_KEY"],
     ["PUBLIC_BASE_URL", "https://platzreife.metzenhof.at"]

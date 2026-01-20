@@ -320,7 +320,7 @@ function renderTermineGrid() {
         </button>
         <p class="error-contact">
           Wenn das Problem bleibt, kontaktiere uns: 
-          <a href="mailto:info@metzenhof.at">info@metzenhof.at</a>
+          <a href="mailto:golf@metzenhof.at">golf@metzenhof.at</a>
         </p>
       </div>
     `;

@@ -220,7 +220,7 @@ PL-K9JM2X  | 2026-01-18T14:15:00 | 2026-03-07 | anna@example.at    | CANCELLED |
 
 | key | value | Beschreibung |
 |-----|-------|--------------|
-| `ADMIN_EMAIL` | info@metzenhof.at | E-Mail für Admin-Benachrichtigungen |
+| `ADMIN_EMAIL` | golf@metzenhof.at | E-Mail für Admin-Benachrichtigungen |
 | `MAIL_FROM_NAME` | Golfclub Metzenhof | Absendername für E-Mails |
 | `ADMIN_KEY` | DeinGeheimesPasswort | Passwort für Admin-Bereich |
 | `PUBLIC_BASE_URL` | https://platzreife.metzenhof.at | Basis-URL für Links in E-Mails |
@@ -623,7 +623,7 @@ Und in `buchen.html` die Anzeige entsprechend anpassen.
 
 Bei Fragen oder Problemen:
 
-- **E-Mail:** info@metzenhof.at
+- **E-Mail:** golf@metzenhof.at
 - **Telefon:** +43 7225 7389
 - **Website:** [www.metzenhof.at](https://www.metzenhof.at)
 
