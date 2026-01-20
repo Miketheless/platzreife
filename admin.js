@@ -746,8 +746,34 @@ async function handleRefresh() {
 elements.loginBtn.addEventListener("click", handleLogin);
 elements.adminKey.addEventListener("keypress", e => { if (e.key === "Enter") handleLogin(); });
 elements.refreshBtn.addEventListener("click", handleRefresh);
-elements.exportBtn.addEventListener("click", () => {
-  window.open(`${API_BASE}?action=admin_export_csv&admin_key=${encodeURIComponent(currentAdminKey)}`, "_blank");
+elements.exportBtn.addEventListener("click", async () => {
+  try {
+    elements.exportBtn.disabled = true;
+    elements.exportBtn.textContent = "Exportiere...";
+    
+    const response = await fetch(`${API_BASE}?action=admin_export_csv&admin_key=${encodeURIComponent(currentAdminKey)}`);
+    const data = await response.json();
+    
+    if (data.success && data.csv) {
+      // CSV als Datei herunterladen
+      const blob = new Blob(["\uFEFF" + data.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `platzerlaubnis_buchungen_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      alert("Export fehlgeschlagen: " + (data.error || "Unbekannter Fehler"));
+    }
+  } catch (err) {
+    alert("Export-Fehler: " + err.message);
+  } finally {
+    elements.exportBtn.disabled = false;
+    elements.exportBtn.textContent = "📥 CSV Export";
+  }
 });
 
 // Kalender Navigation

@@ -733,10 +733,10 @@ function handleAdminExportCsv(adminKey) {
     }
   }
   
+  // CSV als JSON zurückgeben für Client-Download
   return ContentService
-    .createTextOutput(csv)
-    .setMimeType(ContentService.MimeType.CSV)
-    .downloadAsFile("platzreife_buchungen.csv");
+    .createTextOutput(JSON.stringify({ success: true, csv: csv }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
