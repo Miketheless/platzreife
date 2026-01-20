@@ -1140,7 +1140,7 @@ function handleAdminAddBooking(params) {
  * Buchungsbestätigung an Kunde senden
  */
 function sendBookingConfirmationEmail(bookingId, payload, slotData, cancelToken) {
-  const baseUrl = getSetting("PUBLIC_BASE_URL") || "https://example.github.io/platzreife";
+  const baseUrl = getSetting("PUBLIC_BASE_URL") || "https://platzreife.metzenhof.at";
   const fromName = getSetting("MAIL_FROM_NAME") || "gemma golfn";
   const cancelUrl = `${baseUrl}/cancel.html?token=${cancelToken}`;
   
@@ -1148,7 +1148,7 @@ function sendBookingConfirmationEmail(bookingId, payload, slotData, cancelToken)
     `${i + 1}. ${p.first_name} ${p.last_name}`
   ).join("\n");
   
-  const subject = `Buchungsbestätigung – Platzreife-Kurs am ${formatDateForEmail(slotData.date)}`;
+  const subject = `Buchungsbestätigung – Platzerlaubnis-Kurs am ${formatDateForEmail(slotData.date)}`;
   
   const body = `
 Hallo,
@@ -1219,7 +1219,7 @@ function sendAdminNotificationEmail(bookingId, payload, slotData) {
   const subject = `[Neue Buchung] ${bookingId} – ${formatDateForEmail(slotData.date)}`;
   
   const body = `
-Neue Platzreife-Buchung eingegangen!
+Neue Platzerlaubnis-Buchung eingegangen!
 
 Buchungs-ID: ${bookingId}
 Termin: ${formatDateForEmail(slotData.date)}, ${slotData.start}–${slotData.end} Uhr
@@ -1662,7 +1662,7 @@ function initSettings() {
     ["ADMIN_EMAIL", "info@metzenhof.at"],
     ["MAIL_FROM_NAME", "gemma golfn"],
     ["ADMIN_KEY", "CHANGE_THIS_SECRET_KEY"],
-    ["PUBLIC_BASE_URL", "https://DEIN_USERNAME.github.io/platzreife"]
+    ["PUBLIC_BASE_URL", "https://platzreife.metzenhof.at"]
   ];
   
   settings.forEach(s => {

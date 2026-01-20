@@ -44,12 +44,13 @@ const CONFIG = {
     CURRENCY: "EUR"
   },
   
-  // Dokument-URLs (absolut)
+  // Dokument-URLs (absolut für E-Mail-Verwendung)
+  BASE_URL: "https://platzreife.metzenhof.at",
   DOCUMENTS: {
-    AGB_URL: "https://miketheless.github.io/platzreife/agb.html",
-    PRIVACY_URL: "https://miketheless.github.io/platzreife/privacy.html",
-    STATUTES_URL: "https://miketheless.github.io/platzreife/2009_statuten_metzenhof-1.pdf",
-    MEMBERSHIP_TERMS_URL: "https://miketheless.github.io/platzreife/AGB%20Verein%20Golfpark%20Metzenhof.pdf"
+    AGB_URL: "https://platzreife.metzenhof.at/agb.html",
+    PRIVACY_URL: "https://platzreife.metzenhof.at/privacy.html",
+    STATUTES_URL: "https://platzreife.metzenhof.at/2009_statuten_metzenhof-1.pdf",
+    MEMBERSHIP_TERMS_URL: "https://platzreife.metzenhof.at/AGB%20Verein%20Golfpark%20Metzenhof.pdf"
   },
   
   // Feste Termine 2026 (Fallback)
@@ -875,7 +876,7 @@ async function handleSubmit(e) {
     
     // CHECKBOXEN VALIDIEREN
     const requiredCheckboxes = [
-      { id: "agb_kurs", name: "AGB für den Platzreifekurs" },
+      { id: "agb_kurs", name: "AGB für den Platzerlaubniskurs" },
       { id: "privacy_accepted", name: "Datenschutzerklärung" },
       { id: "membership_statutes", name: "Mitgliedschaftsantrag und Statuten" },
       { id: "partner_awareness", name: "Vertragspartner-Kenntnisnahme" },
@@ -1062,7 +1063,7 @@ function showSuccess(bookingId, slotId, count, email, emailSent, webhookResult =
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function init() {
-  console.log("🏌️ Platzreife App v4.3 gestartet (n8n Webhook)");
+  console.log("🏌️ Platzerlaubnis App v4.4 gestartet (n8n Webhook)");
   
   // Slots laden
   allSlots = await fetchSlots();
