@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * PLATZREIFE – Admin JavaScript
- * Golfclub Metzenhof – Version 5.2 (17.01.2026)
+ * Golfclub Metzenhof – Version 5.3 (21.01.2026)
  * 
  * Features:
  * - Monatskalender mit Farbcodierung
@@ -9,6 +9,8 @@
  * - Sortierbare Tabellen
  * - Admin-Checkboxen
  * - Stornierung + Wiederherstellung
+ * - GmbH & Club Spalten (Rechnung/Bezahlt)
+ * - Bezahldatum-Anzeige wenn gesetzt
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -138,13 +140,13 @@ function sortData(data, column, direction) {
     let valA = a[column] ?? "";
     let valB = b[column] ?? "";
     
-    if (["timestamp", "cancelled_at", "slot_id", "paid_date"].includes(column)) {
+    if (["timestamp", "cancelled_at", "slot_id", "paid_date_gmbh", "paid_date_club"].includes(column)) {
       valA = new Date(valA || 0).getTime();
       valB = new Date(valB || 0).getTime();
     } else if (["participants_count", "participant_nr"].includes(column)) {
       valA = parseInt(valA) || 0;
       valB = parseInt(valB) || 0;
-    } else if (["invoice_sent", "appeared", "membership_form", "dsgvo_form"].includes(column)) {
+    } else if (["invoice_sent_gmbh", "invoice_sent_club", "appeared", "membership_form", "dsgvo_form"].includes(column)) {
       valA = valA ? 1 : 0;
       valB = valB ? 1 : 0;
     } else {
@@ -482,11 +484,13 @@ function renderCombinedTable() {
         contact_email: b.contact_email || "",
         contact_phone: b.contact_phone || "",
         status: b.status,
-        invoice_sent: b.invoice_sent,
+        invoice_sent_gmbh: b.invoice_sent_gmbh,
         appeared: b.appeared,
         membership_form: b.membership_form,
         dsgvo_form: b.dsgvo_form,
-        paid_date: b.paid_date,
+        paid_date_gmbh: b.paid_date_gmbh,
+        invoice_sent_club: b.invoice_sent_club,
+        paid_date_club: b.paid_date_club,
         voucher_code: b.voucher_code || "",
         participant_nr: 0,
         first_name: "(keine TN)",
@@ -504,11 +508,13 @@ function renderCombinedTable() {
           contact_email: b.contact_email || "",
           contact_phone: b.contact_phone || "",
           status: b.status,
-          invoice_sent: b.invoice_sent,
+          invoice_sent_gmbh: b.invoice_sent_gmbh,
           appeared: b.appeared,
           membership_form: b.membership_form,
           dsgvo_form: b.dsgvo_form,
-          paid_date: b.paid_date,
+          paid_date_gmbh: b.paid_date_gmbh,
+          invoice_sent_club: b.invoice_sent_club,
+          paid_date_club: b.paid_date_club,
           voucher_code: b.voucher_code || "",
           participant_nr: i + 1,
           first_name: p.first_name || "",
@@ -529,6 +535,26 @@ function renderCombinedTable() {
   
   const sorted = sortData(all, combinedSortColumn, combinedSortDir);
   
+  // Hilfsfunktion für Bezahlt-Anzeige (Datum anzeigen wenn gesetzt, sonst Input)
+  function renderPaidDateCell(bookingId, paidDate, disabled, fieldName) {
+    if (paidDate && !disabled) {
+      // Datum ist gesetzt - zeige es an mit Möglichkeit zum Ändern
+      const formattedDate = formatDate(paidDate);
+      return `
+        <div class="paid-date-display" style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <span style="background:#d4edda;padding:0.15rem 0.4rem;border-radius:3px;font-size:0.7rem;font-weight:600;color:#155724;">${formattedDate}</span>
+          <input type="date" class="admin-date" data-id="${bookingId}" data-field="${fieldName}" value="${paidDate}" style="font-size:0.6rem;padding:0.1rem;max-width:95px;" title="Datum ändern">
+        </div>
+      `;
+    } else if (disabled && paidDate) {
+      // Storniert aber Datum war gesetzt
+      return `<span style="text-decoration:line-through;color:#999;font-size:0.7rem;">${formatDate(paidDate)}</span>`;
+    } else {
+      // Kein Datum - zeige Input
+      return `<input type="date" class="admin-date" data-id="${bookingId}" data-field="${fieldName}" value="${paidDate || ""}" ${disabled ? "disabled" : ""} title="Bezahldatum">`;
+    }
+  }
+
   // Einfache Tabelle - jede Zeile enthält alle Daten, alle Spalten sortierbar
   const html = `
     <table class="admin-table combined-table">
@@ -544,8 +570,10 @@ function renderCombinedTable() {
           <th class="sortable-header" data-column="contact_email">E-Mail ${getSortIcon("contact_email", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header" data-column="contact_phone">Telefon ${getSortIcon("contact_phone", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header" data-column="voucher_code">Gutschein ${getSortIcon("voucher_code", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header col-center" data-column="invoice_sent">Rechnung ${getSortIcon("invoice_sent", combinedSortColumn, combinedSortDir)}</th>
-          <th class="sortable-header col-center" data-column="paid_date">Bezahlt ${getSortIcon("paid_date", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="invoice_sent_gmbh">Rechnung GmbH ${getSortIcon("invoice_sent_gmbh", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="paid_date_gmbh">Bezahlt GmbH ${getSortIcon("paid_date_gmbh", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="invoice_sent_club">Rechnung Club ${getSortIcon("invoice_sent_club", combinedSortColumn, combinedSortDir)}</th>
+          <th class="sortable-header col-center" data-column="paid_date_club">Bezahlt Club ${getSortIcon("paid_date_club", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header col-center" data-column="appeared">Erschienen ${getSortIcon("appeared", combinedSortColumn, combinedSortDir)}</th>
           <th class="sortable-header col-center" data-column="status">Status ${getSortIcon("status", combinedSortColumn, combinedSortDir)}</th>
           <th>Aktion</th>
@@ -569,8 +597,10 @@ function renderCombinedTable() {
               <td><a href="mailto:${row.contact_email}">${row.contact_email || "–"}</a></td>
               <td>${row.contact_phone || "–"}</td>
               <td>${row.voucher_code ? `<span style="background:#e7f5e7;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.7rem;font-weight:600;color:#2e7d32;">${row.voucher_code}</span>` : "–"}</td>
-              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent" ${row.invoice_sent ? "checked" : ""} ${disabled} title="Rechnung gesendet"></td>
-              <td class="col-center"><input type="date" class="admin-date" data-id="${row.booking_id}" value="${row.paid_date || ""}" ${disabled} title="Bezahldatum"></td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent_gmbh" ${row.invoice_sent_gmbh ? "checked" : ""} ${disabled} title="Rechnung GmbH gesendet"></td>
+              <td class="col-center">${renderPaidDateCell(row.booking_id, row.paid_date_gmbh, cancelled, "paid_date_gmbh")}</td>
+              <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="invoice_sent_club" ${row.invoice_sent_club ? "checked" : ""} ${disabled} title="Rechnung Club gesendet"></td>
+              <td class="col-center">${renderPaidDateCell(row.booking_id, row.paid_date_club, cancelled, "paid_date_club")}</td>
               <td class="col-center"><input type="checkbox" class="admin-checkbox" data-id="${row.booking_id}" data-field="appeared" ${row.appeared ? "checked" : ""} ${disabled} title="Teilnehmer erschienen"></td>
               <td class="col-center"><span class="status-badge ${cancelled ? "cancelled" : "confirmed"}">${cancelled ? "✕" : "✓"}</span></td>
               <td class="col-center">
@@ -621,11 +651,16 @@ function attachCombinedListeners() {
     });
   });
   
-  // Date inputs
+  // Date inputs (paid_date_gmbh und paid_date_club)
   document.querySelectorAll(".admin-date").forEach(input => {
     input.addEventListener("change", async (e) => {
       const id = e.target.dataset.id;
-      await updateBookingField(id, "paid_date", e.target.value);
+      const field = e.target.dataset.field || "paid_date_gmbh";
+      const result = await updateBookingField(id, field, e.target.value);
+      if (result.ok) {
+        // Tabelle neu rendern um Anzeige zu aktualisieren
+        await handleRefresh();
+      }
     });
   });
   
@@ -823,4 +858,4 @@ elements.quickBookForm.addEventListener("submit", handleQuickBook);
 // Tabs
 initTabs();
 
-console.log("🔐 Admin Panel v5.2 geladen");
+console.log("🔐 Admin Panel v5.3 geladen (GmbH/Club Spalten)");

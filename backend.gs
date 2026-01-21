@@ -422,7 +422,7 @@ function handleBook(payload) {
     const cancelToken = generateCancelToken();
     const timestamp = new Date().toISOString();
     
-    // Booking eintragen (inkl. Gutscheincode)
+    // Booking eintragen (inkl. Gutscheincode und Club-Felder)
     const bookingsSheet = getSheet(SHEET_BOOKINGS);
     bookingsSheet.appendRow([
       bookingId,
@@ -434,12 +434,14 @@ function handleBook(payload) {
       "CONFIRMED",
       cancelToken,
       "", // cancelled_at
-      false, // invoice_sent
+      false, // invoice_sent_gmbh
       false, // appeared
       false, // membership_form
       false, // dsgvo_form
-      "", // paid_date
-      payload.voucher_code || "" // Gutscheincode
+      "", // paid_date_gmbh
+      payload.voucher_code || "", // Gutscheincode
+      false, // invoice_sent_club (NEU)
+      "" // paid_date_club (NEU)
     ]);
     
     // Participants eintragen
@@ -645,13 +647,15 @@ function handleAdminBookings(adminKey) {
       participants_count: row[5],
       status: row[6],
       cancelled_at: row[8],
-      // Admin-Felder (Spalten 10-15, Index 9-14)
-      invoice_sent: row[9] === true || row[9] === "TRUE" || row[9] === "true",
+      // Admin-Felder (Spalten 10-17, Index 9-16)
+      invoice_sent_gmbh: row[9] === true || row[9] === "TRUE" || row[9] === "true",
       appeared: row[10] === true || row[10] === "TRUE" || row[10] === "true",
       membership_form: row[11] === true || row[11] === "TRUE" || row[11] === "true",
       dsgvo_form: row[12] === true || row[12] === "TRUE" || row[12] === "true",
-      paid_date: row[13] || "",
-      voucher_code: row[14] || "", // Gutscheincode
+      paid_date_gmbh: row[13] || "",
+      voucher_code: row[14] || "",
+      invoice_sent_club: row[15] === true || row[15] === "TRUE" || row[15] === "true",
+      paid_date_club: row[16] || "",
       // Teilnehmer
       participants: participantsByBooking[bookingId] || [],
       // Zeilennummer für Updates (1-indexed)
@@ -758,12 +762,16 @@ function handleAdminUpdate(params) {
   }
   
   // Erlaubte Felder
+  // Spalten: J=10, K=11, L=12, M=13, N=14, O=15, P=16, Q=17
   const fieldMap = {
-    "invoice_sent": 10,      // Spalte J (10)
-    "appeared": 11,          // Spalte K (11)
-    "membership_form": 12,   // Spalte L (12)
-    "dsgvo_form": 13,        // Spalte M (13)
-    "paid_date": 14          // Spalte N (14)
+    "invoice_sent_gmbh": 10,  // Spalte J (10) - Rechnung GmbH
+    "appeared": 11,           // Spalte K (11)
+    "membership_form": 12,    // Spalte L (12)
+    "dsgvo_form": 13,         // Spalte M (13)
+    "paid_date_gmbh": 14,     // Spalte N (14) - Bezahlt GmbH
+    "voucher_code": 15,       // Spalte O (15)
+    "invoice_sent_club": 16,  // Spalte P (16) - Rechnung Club (NEU)
+    "paid_date_club": 17      // Spalte Q (17) - Bezahlt Club (NEU)
   };
   
   const colIndex = fieldMap[field];
@@ -793,7 +801,7 @@ function handleAdminUpdate(params) {
     
     // Wert setzen
     let finalValue = value;
-    if (field !== "paid_date") {
+    if (field !== "paid_date_gmbh" && field !== "paid_date_club" && field !== "voucher_code") {
       // Boolean für Checkboxen
       finalValue = (value === "true" || value === true);
     }
@@ -1071,7 +1079,7 @@ function handleAdminAddBooking(params) {
       const bookingId = generateBookingId();
       const timestamp = new Date().toISOString();
       
-      // Booking eintragen (mit Admin-Markierung, inkl. Gutscheincode)
+      // Booking eintragen (mit Admin-Markierung, inkl. Gutscheincode und Club-Felder)
       const bookingsSheet = getSheet(SHEET_BOOKINGS);
       bookingsSheet.appendRow([
         bookingId,
@@ -1083,12 +1091,14 @@ function handleAdminAddBooking(params) {
         "CONFIRMED",
         "", // cancel_token (leer bei Admin-Buchung)
         "", // cancelled_at
-        false, // invoice_sent
+        false, // invoice_sent_gmbh
         false, // appeared
         false, // membership_form
         false, // dsgvo_form
-        "",    // paid_date
-        payload.voucher_code || "" // Gutscheincode
+        "",    // paid_date_gmbh
+        payload.voucher_code || "", // Gutscheincode
+        false, // invoice_sent_club (NEU)
+        ""     // paid_date_club (NEU)
       ]);
       
       // Participants eintragen
@@ -1686,15 +1696,15 @@ function initSheets() {
     slotsSheet.appendRow(["slot_id", "date", "start", "end", "capacity", "booked", "status"]);
   }
   
-  // Bookings Sheet - mit Admin-Feldern und Gutscheincode
+  // Bookings Sheet - mit Admin-Feldern, Gutscheincode und Club-Feldern
   let bookingsSheet = ss.getSheetByName(SHEET_BOOKINGS);
   if (!bookingsSheet) {
     bookingsSheet = ss.insertSheet(SHEET_BOOKINGS);
     bookingsSheet.appendRow([
       "booking_id", "timestamp", "slot_id", "contact_email", "contact_phone", 
       "participants_count", "status", "cancel_token", "cancelled_at",
-      "invoice_sent", "appeared", "membership_form", "dsgvo_form", "paid_date",
-      "voucher_code"
+      "invoice_sent_gmbh", "appeared", "membership_form", "dsgvo_form", "paid_date_gmbh",
+      "voucher_code", "invoice_sent_club", "paid_date_club"
     ]);
   }
   
@@ -1726,14 +1736,82 @@ function upgradeBookingsSheet() {
   // Prüfen ob neue Spalten schon existieren
   if (!headers.includes("invoice_sent")) {
     const lastCol = sheet.getLastColumn();
-    sheet.getRange(1, lastCol + 1).setValue("invoice_sent");
+    sheet.getRange(1, lastCol + 1).setValue("invoice_sent_gmbh");
     sheet.getRange(1, lastCol + 2).setValue("appeared");
     sheet.getRange(1, lastCol + 3).setValue("membership_form");
     sheet.getRange(1, lastCol + 4).setValue("dsgvo_form");
-    sheet.getRange(1, lastCol + 5).setValue("paid_date");
+    sheet.getRange(1, lastCol + 5).setValue("paid_date_gmbh");
     console.log("Bookings Sheet um Admin-Spalten erweitert!");
   } else {
     console.log("Admin-Spalten bereits vorhanden.");
   }
+}
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════
+ * UPGRADE: Bestehende Bookings Sheet um Club-Spalten erweitern
+ * UND alte Spaltennamen umbenennen (invoice_sent → invoice_sent_gmbh, etc.)
+ * Einmalig ausführen für bestehende Sheets!
+ * WICHTIG: Bestehende Buchungen bleiben erhalten!
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+function upgradeBookingsSheetWithClubColumns() {
+  const sheet = getSheet(SHEET_BOOKINGS);
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  
+  console.log("═══════════════════════════════════════════════════════════");
+  console.log("🔄 UPGRADE: Bookings Sheet mit Club-Spalten erweitern");
+  console.log("═══════════════════════════════════════════════════════════");
+  console.log("Aktuelle Header:", headers.join(", "));
+  
+  let changesCount = 0;
+  
+  // 1. Alte Spaltennamen umbenennen (falls vorhanden)
+  const renameMap = {
+    "invoice_sent": "invoice_sent_gmbh",
+    "paid_date": "paid_date_gmbh"
+  };
+  
+  for (let i = 0; i < headers.length; i++) {
+    if (renameMap[headers[i]]) {
+      const newName = renameMap[headers[i]];
+      sheet.getRange(1, i + 1).setValue(newName);
+      console.log(`   Spalte ${i + 1}: "${headers[i]}" → "${newName}"`);
+      headers[i] = newName; // Aktualisiere lokale Kopie
+      changesCount++;
+    }
+  }
+  
+  // 2. Prüfen ob Club-Spalten bereits existieren
+  const hasInvoiceClub = headers.includes("invoice_sent_club");
+  const hasPaidClub = headers.includes("paid_date_club");
+  
+  // 3. Neue Club-Spalten hinzufügen (am Ende)
+  if (!hasInvoiceClub) {
+    const lastCol = sheet.getLastColumn();
+    sheet.getRange(1, lastCol + 1).setValue("invoice_sent_club");
+    console.log(`   Neue Spalte ${lastCol + 1}: "invoice_sent_club" hinzugefügt`);
+    changesCount++;
+  }
+  
+  if (!hasPaidClub) {
+    const lastCol = sheet.getLastColumn();
+    sheet.getRange(1, lastCol + 1).setValue("paid_date_club");
+    console.log(`   Neue Spalte ${lastCol + 1}: "paid_date_club" hinzugefügt`);
+    changesCount++;
+  }
+  
+  // Ergebnis
+  const newHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  console.log("\n✅ Fertig! " + changesCount + " Änderungen vorgenommen.");
+  console.log("Neue Header:", newHeaders.join(", "));
+  console.log("\n💡 Bestehende Buchungsdaten wurden NICHT verändert!");
+  console.log("═══════════════════════════════════════════════════════════");
+  
+  return { 
+    success: true, 
+    changes: changesCount, 
+    newHeaders: newHeaders 
+  };
 }
 
